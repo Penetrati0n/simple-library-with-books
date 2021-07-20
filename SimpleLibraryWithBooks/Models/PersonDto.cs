@@ -2,7 +2,7 @@
 
 namespace SimpleLibraryWithBooks.Models
 {
-    public class PersonModel
+    public class PersonDto
     {
         public string LastName { get; set; }
         public string FirstName { get; set; }

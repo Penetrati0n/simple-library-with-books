@@ -10,38 +10,38 @@ namespace SimpleLibraryWithBooks.Controllers
     [ApiController]
     public class PersonController : Controller
     {
-        private static readonly List<PersonModel> _people = new List<PersonModel>()
+        private static readonly List<PersonDto> _people = new List<PersonDto>()
         {
-            new PersonModel() { LastName = "Кармазин", FirstName = "Лев", Patronymic = "Олегович", Birthday = DateTime.Parse("12/03/1983")},
-            new PersonModel() { LastName = "Тихомиров", FirstName = "Филипп", Patronymic = "Михайлович", Birthday = DateTime.Parse("17/09/1980")},
-            new PersonModel() { LastName = "Травникова", FirstName = "Мариетта", Patronymic = "Платоновна", Birthday = DateTime.Parse("03/07/2001")},
+            new PersonDto() { LastName = "Кармазин", FirstName = "Лев", Patronymic = "Олегович", Birthday = DateTime.Parse("12/03/1983")},
+            new PersonDto() { LastName = "Тихомиров", FirstName = "Филипп", Patronymic = "Михайлович", Birthday = DateTime.Parse("17/09/1980")},
+            new PersonDto() { LastName = "Травникова", FirstName = "Мариетта", Patronymic = "Платоновна", Birthday = DateTime.Parse("03/07/2001")},
         };
 
         /// <summary>
         /// Get full list of people.
         /// </summary>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonModel"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonDto"/>, 
         /// which contains all existing elements.</returns>
         [HttpGet]
-        public IEnumerable<PersonModel> Get() => _people;
+        public IEnumerable<PersonDto> Get() => _people;
 
         /// <summary>
         /// Get a list of people with a given name.
         /// </summary>
         /// <param name="name">The person's name.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonModel"/>,
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonDto"/>,
         /// in which there are elements in which the name equal <paramref name="name"/>.</returns>
         [HttpGet("{name}")]
-        public IEnumerable<PersonModel> Get(string name) => _people.Where(p => p.FirstName == name);
+        public IEnumerable<PersonDto> Get(string name) => _people.Where(p => p.FirstName == name);
 
         /// <summary>
         /// Adds a new person.
         /// </summary>
         /// <param name="person">New person.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonModel"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonDto"/>, 
         /// which contains all existing elements with a new <paramref name="person"/>.</returns>
         [HttpPost]
-        public IEnumerable<PersonModel> Post([FromBody]PersonModel person)
+        public IEnumerable<PersonDto> Post([FromBody]PersonDto person)
         {
             _people.Add(person);
 

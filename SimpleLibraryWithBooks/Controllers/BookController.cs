@@ -9,38 +9,38 @@ namespace SimpleLibraryWithBooks.Controllers
     [ApiController]
     public class BookController : Controller
     {
-        private static readonly List<BookModel> _books = new List<BookModel>()
+        private static readonly List<BookDto> _books = new List<BookDto>()
         {
-            new BookModel() { Title  = "Горе от ума", Author = "Александр Грибоедов", Genre = "Комедия" },
-            new BookModel() { Title  = "Гордость и предубеждение", Author = "Джейн Остин", Genre = "Роман" },
-            new BookModel() { Title  = "Тёмные начала", Author = "Филип Пулман", Genre = "Фэнтези" },
+            new BookDto() { Title  = "Горе от ума", Author = "Александр Грибоедов", Genre = "Комедия" },
+            new BookDto() { Title  = "Гордость и предубеждение", Author = "Джейн Остин", Genre = "Роман" },
+            new BookDto() { Title  = "Тёмные начала", Author = "Филип Пулман", Genre = "Фэнтези" },
         };
 
         /// <summary>
         /// Get full list of books.
         /// </summary>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookModel"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookDto"/>, 
         /// which contains all existing elements.</returns>
         [HttpGet]
-        public IEnumerable<BookModel> Get() => _books;
+        public IEnumerable<BookDto> Get() => _books;
 
         /// <summary>
         /// Get a list of books with a given author.
         /// </summary>
         /// <param name="author">Author of the book.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="BookModel"/>,
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="BookDto"/>,
         /// in which there are elements in which the author equal <paramref name="author"/>.</returns>
         [HttpGet("{author}")]
-        public IEnumerable<BookModel> Get(string author) =>_books.Where(b => b.Author == author);
+        public IEnumerable<BookDto> Get(string author) =>_books.Where(b => b.Author == author);
 
         /// <summary>
         /// Adds a new book.
         /// </summary>
         /// <param name="book">New book.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookModel"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookDto"/>, 
         /// which contains all existing elements with a new <paramref name="book"/>.</returns>
         [HttpPost]
-        public IEnumerable<BookModel> Post([FromBody]BookModel book)
+        public IEnumerable<BookDto> Post([FromBody]BookDto book)
         {
             _books.Add(book);
 
