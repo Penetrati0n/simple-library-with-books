@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using SimpleLibraryWithBooks.Services;
 using SimpleLibraryWithBooks.Extensions;
@@ -19,7 +20,21 @@ namespace SimpleLibraryWithBooks.Controllers
         [HttpPost]
         public IEnumerable<PersonBookModel> Post([FromBody]PersonBookModel personBook)
         {
+            var personFromBody = personBook.Person;
+            var bookFromBody = personBook.Book;
+
+            var person = PeopleRepository.People.Single(p => p.LastName == personFromBody.LastName &&
+                                                             p.FirstName == personFromBody.FirstName &&
+                                                             p.Patronymic == personFromBody.Patronymic &&
+                                                             p.Birthday == personFromBody.Birthday);
+            
+            var book = BookRepository.Books.Single(b => b.Title == bookFromBody.Title &&
+                                                        b.Author == bookFromBody.Author &&
+                                                        b.Genre == bookFromBody.Genre);
+            personBook.Person = person;
+            personBook.Book = book;
             personBook.DateTimeReceipt = personBook.DateTimeReceipt.SubstringTicks().ChangeTimeZone();
+            
             PersonBookRepository.PersonBooks.Add(personBook);
 
             return PersonBookRepository.PersonBooks;
