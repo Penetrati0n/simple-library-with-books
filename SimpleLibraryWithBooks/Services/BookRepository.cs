@@ -5,11 +5,11 @@ namespace SimpleLibraryWithBooks.Services
 {
     public static class BookRepository
     {
-        public readonly static List<BookDetailDto> Books = new List<BookDetailDto>()
+        public readonly static List<BookModel> Books = new List<BookModel>()
         {
-            new BookDetailDto() { Title  = "Горе от ума", Author = "Александр Грибоедов", Genre = "Комедия" },
-            new BookDetailDto() { Title  = "Гордость и предубеждение", Author = "Джейн Остин", Genre = "Роман" },
-            new BookDetailDto() { Title  = "Тёмные начала", Author = "Филип Пулман", Genre = "Фэнтези" },
+            new BookModel() { Title  = "Горе от ума", Author = "Александр Грибоедов", Genre = "Комедия" },
+            new BookModel() { Title  = "Гордость и предубеждение", Author = "Джейн Остин", Genre = "Роман" },
+            new BookModel() { Title  = "Тёмные начала", Author = "Филип Пулман", Genre = "Фэнтези" },
         };
     }
 }

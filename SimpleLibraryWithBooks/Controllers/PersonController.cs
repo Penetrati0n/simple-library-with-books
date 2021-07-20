@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using SimpleLibraryWithBooks.Services;
+using SimpleLibraryWithBooks.Extensions;
 using SimpleLibraryWithBooks.Models.Person;
 
 namespace SimpleLibraryWithBooks.Controllers
@@ -13,29 +14,30 @@ namespace SimpleLibraryWithBooks.Controllers
         /// <summary>
         /// Get full list of people.
         /// </summary>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonDetailDto"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonModel"/>, 
         /// which contains all existing elements.</returns>
         [HttpGet]
-        public IEnumerable<PersonDetailDto> Get() => PeopleRepository.People;
+        public IEnumerable<PersonModel> Get() => PeopleRepository.People;
 
         /// <summary>
         /// Get a list of people with a given name.
         /// </summary>
         /// <param name="name">The person's name.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonDetailDto"/>,
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonModel"/>,
         /// in which there are elements in which the name equal <paramref name="name"/>.</returns>
         [HttpGet("{name}")]
-        public IEnumerable<PersonDetailDto> Get(string name) => PeopleRepository.People.Where(p => p.FirstName == name);
+        public IEnumerable<PersonModel> Get(string name) => PeopleRepository.People.Where(p => p.FirstName == name);
 
         /// <summary>
         /// Adds a new person.
         /// </summary>
         /// <param name="person">New person.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonDetailDto"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonModel"/>, 
         /// which contains all existing elements with a new <paramref name="person"/>.</returns>
         [HttpPost]
-        public IEnumerable<PersonDetailDto> Post([FromBody] PersonDetailDto person)
+        public IEnumerable<PersonModel> Post([FromBody] PersonModel person)
         {
+            person.Birthday = person.Birthday.SubstringTicks().ChangeTimeZone();
             PeopleRepository.People.Add(person);
 
             return PeopleRepository.People;

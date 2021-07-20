@@ -6,11 +6,11 @@ namespace SimpleLibraryWithBooks.Services
 {
     public static class PeopleRepository
     {
-        public static readonly List<PersonDetailDto> People = new List<PersonDetailDto>()
+        public static readonly List<PersonModel> People = new List<PersonModel>()
         {
-            new PersonDetailDto() { LastName = "Кармазин", FirstName = "Лев", Patronymic = "Олегович", Birthday = DateTime.Parse("12/03/1983")},
-            new PersonDetailDto() { LastName = "Тихомиров", FirstName = "Филипп", Patronymic = "Михайлович", Birthday = DateTime.Parse("17/09/1980")},
-            new PersonDetailDto() { LastName = "Травникова", FirstName = "Мариетта", Patronymic = "Платоновна", Birthday = DateTime.Parse("03/07/2001")},
+            new PersonModel() { LastName = "Кармазин", FirstName = "Лев", Patronymic = "Олегович", Birthday = DateTimeOffset.Parse("12/03/1983")},
+            new PersonModel() { LastName = "Тихомиров", FirstName = "Филипп", Patronymic = "Михайлович", Birthday = DateTimeOffset.Parse("17/09/1980")},
+            new PersonModel() { LastName = "Травникова", FirstName = "Мариетта", Patronymic = "Платоновна", Birthday = DateTimeOffset.Parse("03/07/2001")},
         };
     }
 }

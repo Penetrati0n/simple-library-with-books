@@ -13,28 +13,28 @@ namespace SimpleLibraryWithBooks.Controllers
         /// <summary>
         /// Get full list of books.
         /// </summary>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookDetailDto"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookModel"/>, 
         /// which contains all existing elements.</returns>
         [HttpGet]
-        public IEnumerable<BookDetailDto> Get() => BookRepository.Books;
+        public IEnumerable<BookModel> Get() => BookRepository.Books;
 
         /// <summary>
         /// Get a list of books with a given author.
         /// </summary>
         /// <param name="author">Author of the book.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="BookDetailDto"/>,
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="BookModel"/>,
         /// in which there are elements in which the author equal <paramref name="author"/>.</returns>
         [HttpGet("{author}")]
-        public IEnumerable<BookDetailDto> Get(string author) => BookRepository.Books.Where(b => b.Author == author);
+        public IEnumerable<BookModel> Get(string author) => BookRepository.Books.Where(b => b.Author == author);
 
         /// <summary>
         /// Adds a new book.
         /// </summary>
         /// <param name="book">New book.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookDetailDto"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookModel"/>, 
         /// which contains all existing elements with a new <paramref name="book"/>.</returns>
         [HttpPost]
-        public IEnumerable<BookDetailDto> Post([FromBody] BookDetailDto book)
+        public IEnumerable<BookModel> Post([FromBody] BookModel book)
         {
             BookRepository.Books.Add(book);
 
