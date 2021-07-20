@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using SimpleLibraryWithBooks.Models;
+using SimpleLibraryWithBooks.Services;
+using SimpleLibraryWithBooks.Models.Person;
 
 namespace SimpleLibraryWithBooks.Controllers
 {
@@ -10,42 +10,35 @@ namespace SimpleLibraryWithBooks.Controllers
     [ApiController]
     public class PersonController : Controller
     {
-        private static readonly List<PersonDto> _people = new List<PersonDto>()
-        {
-            new PersonDto() { LastName = "Кармазин", FirstName = "Лев", Patronymic = "Олегович", Birthday = DateTime.Parse("12/03/1983")},
-            new PersonDto() { LastName = "Тихомиров", FirstName = "Филипп", Patronymic = "Михайлович", Birthday = DateTime.Parse("17/09/1980")},
-            new PersonDto() { LastName = "Травникова", FirstName = "Мариетта", Patronymic = "Платоновна", Birthday = DateTime.Parse("03/07/2001")},
-        };
-
         /// <summary>
         /// Get full list of people.
         /// </summary>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonDto"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonDetailDto"/>, 
         /// which contains all existing elements.</returns>
         [HttpGet]
-        public IEnumerable<PersonDto> Get() => _people;
+        public IEnumerable<PersonDetailDto> Get() => PeopleRepository.People;
 
         /// <summary>
         /// Get a list of people with a given name.
         /// </summary>
         /// <param name="name">The person's name.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonDto"/>,
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonDetailDto"/>,
         /// in which there are elements in which the name equal <paramref name="name"/>.</returns>
         [HttpGet("{name}")]
-        public IEnumerable<PersonDto> Get(string name) => _people.Where(p => p.FirstName == name);
+        public IEnumerable<PersonDetailDto> Get(string name) => PeopleRepository.People.Where(p => p.FirstName == name);
 
         /// <summary>
         /// Adds a new person.
         /// </summary>
         /// <param name="person">New person.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonDto"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonDetailDto"/>, 
         /// which contains all existing elements with a new <paramref name="person"/>.</returns>
         [HttpPost]
-        public IEnumerable<PersonDto> Post([FromBody]PersonDto person)
+        public IEnumerable<PersonDetailDto> Post([FromBody] PersonDetailDto person)
         {
-            _people.Add(person);
+            PeopleRepository.People.Add(person);
 
-            return _people;
+            return PeopleRepository.People;
         }
 
         /// <summary>
@@ -58,14 +51,15 @@ namespace SimpleLibraryWithBooks.Controllers
         /// <item><term><see cref="OkResult"/></term><description> the person was successfully deleted.</description></item>
         /// <item><term><see cref="NotFoundResult"/></term><description> the person was not found</description></item>
         /// </list></returns>
-        [HttpDelete]
+        [HttpDelete("{lastName}&{firstName}&{patronymic}")]
         public IActionResult Delete(string lastName, string firstName, string patronymic)
         {
-            var person = _people.SingleOrDefault(p => p.LastName == lastName && p.FirstName == firstName && p.Patronymic == patronymic);
+            var person = PeopleRepository.People
+                .SingleOrDefault(p => p.LastName == lastName && p.FirstName == firstName && p.Patronymic == patronymic);
 
             if (person == null) return NotFound();
 
-            _people.Remove(person);
+            PeopleRepository.People.Remove(person);
 
             return Ok();
         }

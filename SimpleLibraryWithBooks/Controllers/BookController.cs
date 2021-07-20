@@ -1,7 +1,8 @@
 ﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using SimpleLibraryWithBooks.Models;
+using SimpleLibraryWithBooks.Services;
+using SimpleLibraryWithBooks.Models.Book;
 
 namespace SimpleLibraryWithBooks.Controllers
 {
@@ -9,42 +10,35 @@ namespace SimpleLibraryWithBooks.Controllers
     [ApiController]
     public class BookController : Controller
     {
-        private static readonly List<BookDto> _books = new List<BookDto>()
-        {
-            new BookDto() { Title  = "Горе от ума", Author = "Александр Грибоедов", Genre = "Комедия" },
-            new BookDto() { Title  = "Гордость и предубеждение", Author = "Джейн Остин", Genre = "Роман" },
-            new BookDto() { Title  = "Тёмные начала", Author = "Филип Пулман", Genre = "Фэнтези" },
-        };
-
         /// <summary>
         /// Get full list of books.
         /// </summary>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookDto"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookDetailDto"/>, 
         /// which contains all existing elements.</returns>
         [HttpGet]
-        public IEnumerable<BookDto> Get() => _books;
+        public IEnumerable<BookDetailDto> Get() => BookRepository.Books;
 
         /// <summary>
         /// Get a list of books with a given author.
         /// </summary>
         /// <param name="author">Author of the book.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="BookDto"/>,
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="BookDetailDto"/>,
         /// in which there are elements in which the author equal <paramref name="author"/>.</returns>
         [HttpGet("{author}")]
-        public IEnumerable<BookDto> Get(string author) =>_books.Where(b => b.Author == author);
+        public IEnumerable<BookDetailDto> Get(string author) => BookRepository.Books.Where(b => b.Author == author);
 
         /// <summary>
         /// Adds a new book.
         /// </summary>
         /// <param name="book">New book.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookDto"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookDetailDto"/>, 
         /// which contains all existing elements with a new <paramref name="book"/>.</returns>
         [HttpPost]
-        public IEnumerable<BookDto> Post([FromBody]BookDto book)
+        public IEnumerable<BookDetailDto> Post([FromBody] BookDetailDto book)
         {
-            _books.Add(book);
+            BookRepository.Books.Add(book);
 
-            return _books;
+            return BookRepository.Books;
         }
 
         /// <summary>
@@ -56,13 +50,13 @@ namespace SimpleLibraryWithBooks.Controllers
         /// <item><term><see cref="OkResult"/></term><description> the book was successfully deleted.</description></item>
         /// <item><term><see cref="NotFoundResult"/></term><description> the book was not found</description></item>
         /// </list></returns>
-        [HttpDelete]
+        [HttpDelete("{title}&{author}")]
         public IActionResult Delete(string title, string author)
         {
-            var book = _books.SingleOrDefault(b => b.Title == title && b.Author == author);
+            var book = BookRepository.Books.SingleOrDefault(b => b.Title == title && b.Author == author);
             if (book == null) return NotFound();
 
-            _books.Remove(book);
+            BookRepository.Books.Remove(book);
 
             return Ok();
         }
