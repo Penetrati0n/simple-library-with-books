@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using System.Buffers;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using SimpleLibraryWithBooks.Services;
@@ -31,14 +33,16 @@ namespace SimpleLibraryWithBooks.Controllers
         /// Adds a new book.
         /// </summary>
         /// <param name="book">New book.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookModel"/>, 
-        /// which contains all existing elements with a new <paramref name="book"/>.</returns>
+        /// <returns>Returns <see cref="object"/> which contains all existing elements <see cref="BookModel"/>
+        /// with a new <paramref name="book"/> without <c>Genre</c> property.</returns>
         [HttpPost]
-        public IEnumerable<BookModel> Post([FromBody] BookModel book)
+        public object Post([FromBody] BookModel book)
         {
             BookRepository.Books.Add(book);
 
-            return BookRepository.Books;
+            var buffer = GetUtf8JsonBytes(BookRepository.Books);
+
+            return JsonSerializer.Deserialize<object>(buffer.WrittenSpan);
         }
 
         /// <summary>
@@ -59,6 +63,40 @@ namespace SimpleLibraryWithBooks.Controllers
             BookRepository.Books.Remove(book);
 
             return Ok();
+        }
+
+        /// <summary>
+        /// Creates and writes a list of <see cref="BookModel"/> to the buffer.
+        /// </summary>
+        /// <param name="books">List of <see cref="BookModel"/>.</param>
+        /// <returns>Buffer with a json representation of the <paramref name="books"/>.</returns>
+        private static ArrayBufferWriter<byte> GetUtf8JsonBytes(IEnumerable<BookModel> books)
+        {
+            var buffer = new ArrayBufferWriter<byte>();
+            var writer = new Utf8JsonWriter(buffer);
+
+            writer.WriteStartArray();
+            foreach (var b in books)
+            {
+                WriteBook(writer, b);
+            }
+            writer.WriteEndArray();
+            writer.Flush();
+
+            return buffer;
+        }
+
+        /// <summary>
+        /// Writes a book to the buffer.
+        /// </summary>
+        /// <param name="writer">The writer with whom you need to write a <paramref name="book"/>.</param>
+        /// <param name="book">The book to be written to the buffer.</param>
+        public static void WriteBook(Utf8JsonWriter writer, BookModel book)
+        {
+            writer.WriteStartObject();
+            writer.WriteString("title", book.Title);
+            writer.WriteString("author", book.Author);
+            writer.WriteEndObject();
         }
     }
 }

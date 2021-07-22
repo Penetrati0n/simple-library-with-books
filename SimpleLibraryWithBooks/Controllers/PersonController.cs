@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using System.Buffers;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using SimpleLibraryWithBooks.Services;
@@ -32,15 +34,17 @@ namespace SimpleLibraryWithBooks.Controllers
         /// Adds a new person.
         /// </summary>
         /// <param name="person">New person.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonModel"/>, 
-        /// which contains all existing elements with a new <paramref name="person"/>.</returns>
+        /// <returns>Returns <see cref="object"/> which contains all existing elements <see cref="PersonModel"/>
+        /// with a new <paramref name="person"/> without <c>Birthday</c> property.</returns>
         [HttpPost]
-        public IEnumerable<PersonModel> Post([FromBody] PersonModel person)
+        public object Post([FromBody] PersonModel person)
         {
             person.Birthday = person.Birthday.SubstringTicks().ChangeTimeZone();
             PeopleRepository.People.Add(person);
 
-            return PeopleRepository.People;
+            var buffer = GetUtf8JsonBytes(PeopleRepository.People);
+
+            return JsonSerializer.Deserialize<object>(buffer.WrittenSpan);
         }
 
         /// <summary>
@@ -64,6 +68,41 @@ namespace SimpleLibraryWithBooks.Controllers
             PeopleRepository.People.Remove(person);
 
             return Ok();
+        }
+
+        /// <summary>
+        /// Creates and writes a list of <see cref="PersonModel"/> to the buffer.
+        /// </summary>
+        /// <param name="people">List of <see cref="PersonModel"/>.</param>
+        /// <returns>Buffer with a json representation of the <paramref name="people"/>.</returns>
+        private static ArrayBufferWriter<byte> GetUtf8JsonBytes(IEnumerable<PersonModel> people)
+        {
+            var buffer = new ArrayBufferWriter<byte>();
+            var writer = new Utf8JsonWriter(buffer);
+
+            writer.WriteStartArray();
+            foreach (var p in people)
+            {
+                WritePerson(writer, p);
+            }
+            writer.WriteEndArray();
+            writer.Flush();
+
+            return buffer;
+        }
+
+        /// <summary>
+        /// Writes a person to the buffer.
+        /// </summary>
+        /// <param name="writer">The writer with which to record the <paramref name="person"/>.</param>
+        /// <param name="person">The person to be written to the buffer.</param>
+        public static void WritePerson(Utf8JsonWriter writer, PersonModel person)
+        {
+            writer.WriteStartObject();
+            writer.WriteString("lastName", person.LastName);
+            writer.WriteString("firstName", person.FirstName);
+            writer.WriteString("patronymic", person.Patronymic);
+            writer.WriteEndObject();
         }
     }
 }
