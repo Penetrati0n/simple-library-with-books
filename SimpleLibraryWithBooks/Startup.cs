@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using SimpleLibraryWithBooks.Services;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +26,9 @@ namespace SimpleLibraryWithBooks
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IBookRepository, BookRepository>();
+            services.AddScoped<IPeopleRepository, PeopleRepository>();
+            services.AddScoped<IPersonBookRepository, PersonBookRepository>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

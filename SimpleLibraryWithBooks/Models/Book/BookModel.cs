@@ -1,9 +1,8 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SimpleLibraryWithBooks.Models.Book
 {
-    public class BookModel : IEquatable<BookModel>
+    public class BookModel
     {
         [Required]
         [MaxLength(100)]
@@ -18,7 +17,5 @@ namespace SimpleLibraryWithBooks.Models.Book
         [Required]
         [MaxLength(100)]
         public string Genre { get; set; }
-
-        public bool Equals(BookModel other) => (this.Title, this.Author, this.Genre) == (other.Title, other.Author, other.Genre);
     }
 }

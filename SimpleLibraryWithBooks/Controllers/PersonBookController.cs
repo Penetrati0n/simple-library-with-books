@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -13,6 +12,19 @@ namespace SimpleLibraryWithBooks.Controllers
     [ApiController]
     public class PersonBookController : Controller
     {
+        private readonly IBookRepository _bookRepository;
+        private readonly IPeopleRepository _peopleRepository;
+        private readonly IPersonBookRepository _personBookRepository;
+
+        public PersonBookController(IBookRepository bookRepository,
+                                    IPeopleRepository peopleRepository,
+                                    IPersonBookRepository personBookRepository)
+        {
+            _bookRepository = bookRepository;
+            _peopleRepository = peopleRepository;
+            _personBookRepository = personBookRepository;
+        }
+
         /// <summary>
         /// Adds a new bunch of person-book.
         /// </summary>
@@ -25,20 +37,21 @@ namespace SimpleLibraryWithBooks.Controllers
             var personFromBody = personBook.Person;
             var bookFromBody = personBook.Book;
 
-            if (!PeopleRepository.People.Contains(personFromBody))
+            if (!_peopleRepository.Contains(personFromBody.LastName, personFromBody.FirstName, personFromBody.Patronymic))
                 return BadRequest("Person is not found.");
-            if (!BookRepository.Books.Contains(bookFromBody))
+            if (!_bookRepository.Contains(bookFromBody.Title, bookFromBody.Author))
                 return BadRequest("Book is not found.");
 
-            var person = PeopleRepository.People.Single(p => personFromBody.Equals(p));
-            var book = BookRepository.Books.Single(b => bookFromBody.Equals(b));
+            var person = _peopleRepository.GetPerson(personFromBody.LastName, personFromBody.FirstName, personFromBody.Patronymic);
+            var book = _bookRepository.GetBook(bookFromBody.Title, bookFromBody.Author);
 
             personBook.Person = person;
             personBook.Book = book;
             personBook.DateTimeReceipt = personBook.DateTimeReceipt.SubstringTicks().ChangeTimeZone();
-            PersonBookRepository.PersonBooks.Add(personBook);
+            _personBookRepository.InsertPersonBook(personBook);
+            _personBookRepository.Save();
 
-            var buffer = GetUtf8JsonBytes(PersonBookRepository.PersonBooks);
+            var buffer = GetUtf8JsonBytes(_personBookRepository.GetAllPersonBooks());
             return Ok(JsonSerializer.Deserialize<object>(buffer.WrittenSpan));
         }
 

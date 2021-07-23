@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -13,13 +12,19 @@ namespace SimpleLibraryWithBooks.Controllers
     [ApiController]
     public class PersonController : Controller
     {
+        private readonly IPeopleRepository _peopleRepository;
+
+        public PersonController(IPeopleRepository peopleRepository) =>
+            _peopleRepository = peopleRepository;
+
         /// <summary>
         /// Get full list of people.
         /// </summary>
         /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonModel"/>, 
         /// which contains all existing elements.</returns>
         [HttpGet]
-        public IEnumerable<PersonModel> Get() => PeopleRepository.People;
+        public IEnumerable<PersonModel> Get() =>
+            _peopleRepository.GetAllPeople();
 
         /// <summary>
         /// Get a list of people with a given name.
@@ -28,7 +33,8 @@ namespace SimpleLibraryWithBooks.Controllers
         /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonModel"/>,
         /// in which there are elements in which the name equal <paramref name="name"/>.</returns>
         [HttpGet("{name}")]
-        public IEnumerable<PersonModel> Get(string name) => PeopleRepository.People.Where(p => p.FirstName == name);
+        public IEnumerable<PersonModel> Get(string name) =>
+            _peopleRepository.GetAllPeople(p => p.FirstName == name);
 
         /// <summary>
         /// Adds a new person.
@@ -40,9 +46,10 @@ namespace SimpleLibraryWithBooks.Controllers
         public object Post([FromBody] PersonModel person)
         {
             person.Birthday = person.Birthday.SubstringTicks().ChangeTimeZone();
-            PeopleRepository.People.Add(person);
+            _peopleRepository.InsertPerson(person);
+            _peopleRepository.Save();
 
-            var buffer = GetUtf8JsonBytes(PeopleRepository.People);
+            var buffer = GetUtf8JsonBytes(_peopleRepository.GetAllPeople());
 
             return JsonSerializer.Deserialize<object>(buffer.WrittenSpan);
         }
@@ -60,12 +67,11 @@ namespace SimpleLibraryWithBooks.Controllers
         [HttpDelete("{lastName}&{firstName}&{patronymic}")]
         public IActionResult Delete(string lastName, string firstName, string patronymic)
         {
-            var person = PeopleRepository.People
-                .SingleOrDefault(p => p.LastName == lastName && p.FirstName == firstName && p.Patronymic == patronymic);
+            if (!_peopleRepository.Contains(lastName, firstName, patronymic))
+                return NotFound();
 
-            if (person == null) return NotFound();
-
-            PeopleRepository.People.Remove(person);
+            _peopleRepository.DeletePerson(lastName, firstName, patronymic);
+            _peopleRepository.Save();
 
             return Ok();
         }

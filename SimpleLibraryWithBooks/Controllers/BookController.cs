@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -12,13 +11,19 @@ namespace SimpleLibraryWithBooks.Controllers
     [ApiController]
     public class BookController : Controller
     {
+        private readonly IBookRepository _bookRepository;
+
+        public BookController(IBookRepository bookRepository) =>
+            _bookRepository = bookRepository;
+
         /// <summary>
         /// Get full list of books.
         /// </summary>
         /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="BookModel"/>, 
         /// which contains all existing elements.</returns>
         [HttpGet]
-        public IEnumerable<BookModel> Get() => BookRepository.Books;
+        public IEnumerable<BookModel> Get() =>
+            _bookRepository.GetAllBooks();
 
         /// <summary>
         /// Get a list of books with a given author.
@@ -27,7 +32,8 @@ namespace SimpleLibraryWithBooks.Controllers
         /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="BookModel"/>,
         /// in which there are elements in which the author equal <paramref name="author"/>.</returns>
         [HttpGet("{author}")]
-        public IEnumerable<BookModel> Get(string author) => BookRepository.Books.Where(b => b.Author == author);
+        public IEnumerable<BookModel> Get(string author) =>
+            _bookRepository.GetAllBooks(b => b.Author == author);
 
         /// <summary>
         /// Adds a new book.
@@ -38,9 +44,10 @@ namespace SimpleLibraryWithBooks.Controllers
         [HttpPost]
         public object Post([FromBody] BookModel book)
         {
-            BookRepository.Books.Add(book);
+            _bookRepository.InsertBook(book);
+            _bookRepository.Save();
 
-            var buffer = GetUtf8JsonBytes(BookRepository.Books);
+            var buffer = GetUtf8JsonBytes(_bookRepository.GetAllBooks());
 
             return JsonSerializer.Deserialize<object>(buffer.WrittenSpan);
         }
@@ -57,10 +64,11 @@ namespace SimpleLibraryWithBooks.Controllers
         [HttpDelete("{title}&{author}")]
         public IActionResult Delete(string title, string author)
         {
-            var book = BookRepository.Books.SingleOrDefault(b => b.Title == title && b.Author == author);
-            if (book == null) return NotFound();
+            if (!_bookRepository.Contains(title, author))
+                return NotFound();
 
-            BookRepository.Books.Remove(book);
+            _bookRepository.DeleteBook(title, author);
+            _bookRepository.Save();
 
             return Ok();
         }

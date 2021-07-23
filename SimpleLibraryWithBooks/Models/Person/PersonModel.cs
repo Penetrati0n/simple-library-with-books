@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SimpleLibraryWithBooks.Models.Person
 {
-    public class PersonModel : IEquatable<PersonModel>
+    public class PersonModel
     {
         [Required]
         [MaxLength(100)]
@@ -26,11 +26,5 @@ namespace SimpleLibraryWithBooks.Models.Person
         [Required]
         [DataType(DataType.Date)]
         public DateTimeOffset Birthday { get; set; }
-
-        public bool Equals(PersonModel other) =>
-            this.LastName == other.LastName &&
-            this.FirstName == other.FirstName &&
-            this.Patronymic == other.Patronymic &&
-            this.Birthday == other.Birthday;
     }
 }
