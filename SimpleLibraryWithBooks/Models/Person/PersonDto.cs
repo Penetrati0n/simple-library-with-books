@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SimpleLibraryWithBooks.Models.Person
 {
-    public class PersonModel
+    public class PersonDto
     {
         [Required]
         [MaxLength(100)]

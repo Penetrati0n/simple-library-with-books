@@ -7,32 +7,39 @@ namespace SimpleLibraryWithBooks.Services
 {
     public class PeopleRepository : IPeopleRepository
     {
-        private static readonly List<PersonModel> _people = new List<PersonModel>()
+        private static readonly List<PersonEntity> _people = new List<PersonEntity>()
         {
-            new PersonModel() { LastName = "Кармазин", FirstName = "Лев", Patronymic = "Олегович", Birthday = DateTimeOffset.Parse("12/03/1983")},
-            new PersonModel() { LastName = "Тихомиров", FirstName = "Филипп", Patronymic = "Михайлович", Birthday = DateTimeOffset.Parse("17/09/1980")},
-            new PersonModel() { LastName = "Травникова", FirstName = "Мариетта", Patronymic = "Платоновна", Birthday = DateTimeOffset.Parse("03/07/2001")},
+            new PersonEntity() { Id = 1, LastName = "Кармазин", FirstName = "Лев", Patronymic = "Олегович", Birthday = DateTimeOffset.Parse("12/03/1983")},
+            new PersonEntity() { Id = 2, LastName = "Тихомиров", FirstName = "Филипп", Patronymic = "Михайлович", Birthday = DateTimeOffset.Parse("17/09/1980")},
+            new PersonEntity() { Id = 3, LastName = "Травникова", FirstName = "Мариетта", Patronymic = "Платоновна", Birthday = DateTimeOffset.Parse("03/07/2001")},
         };
 
-        public IEnumerable<PersonModel> GetAllPeople() =>
+        private static int _currentId = _people.Count;
+
+        public IEnumerable<PersonEntity> GetAllPeople() =>
             _people;
 
-        public IEnumerable<PersonModel> GetAllPeople(Func<PersonModel, bool> rule) =>
+        public IEnumerable<PersonEntity> GetAllPeople(Func<PersonEntity, bool> rule) =>
             _people.Where(rule);
 
-        public PersonModel GetPerson(int personId) =>
+        public PersonEntity GetPerson(int personId) =>
            _people[personId];
 
-        public PersonModel GetPerson(string lastName, string firstName, string patronymic) =>
+        public PersonEntity GetPerson(string lastName, string firstName, string patronymic) =>
             _people.Single(p => (p.LastName, p.FirstName, p.Patronymic) == (lastName, firstName, patronymic));
 
         public void DeletePerson(int personId) =>
             _people.RemoveAt(personId);
 
-        public void InsertPerson(PersonModel person) =>
-            _people.Add(person);
+        public void InsertPerson(PersonEntity person)
+        {
+            _currentId++;
+            person.Id = _currentId;
 
-        public void UpdatePerson(PersonModel person)
+            _people.Add(person);
+        }
+
+        public void UpdatePerson(PersonEntity person)
         { }
 
         public void DeletePerson(string lastName, string firstName, string patronymic)

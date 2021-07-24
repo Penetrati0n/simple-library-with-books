@@ -2,7 +2,7 @@
 
 namespace SimpleLibraryWithBooks.Models.Book
 {
-    public class BookModel
+    public class BookDto
     {
         [Required]
         [MaxLength(100)]

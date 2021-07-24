@@ -1,19 +1,17 @@
 ﻿using System;
 using SimpleLibraryWithBooks.Models.Book;
 using SimpleLibraryWithBooks.Models.Person;
-using System.ComponentModel.DataAnnotations;
 
 namespace SimpleLibraryWithBooks.Models.PersonBook
 {
-    public class PersonBookModel
+    public class PersonBookEntity
     {
-        [Required]
-        public PersonModel Person { get; set; }
+        public int Id { get; set; }
+
+        public PersonEntity Person { get; set; }
         
-        [Required]
-        public BookModel Book { get; set; }
+        public BookEntity Book { get; set; }
         
-        [Required]
         public DateTimeOffset DateTimeReceipt { get; set; }
     }
 }

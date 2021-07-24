@@ -6,12 +6,12 @@ namespace SimpleLibraryWithBooks.Services
 {
     public interface IPeopleRepository
     {
-        IEnumerable<PersonModel> GetAllPeople();
-        IEnumerable<PersonModel> GetAllPeople(Func<PersonModel, bool> rule);
-        PersonModel GetPerson(int personId);
-        PersonModel GetPerson(string lastName, string firstName, string patronymic);
-        void InsertPerson(PersonModel person);
-        void UpdatePerson(PersonModel person);
+        IEnumerable<PersonEntity> GetAllPeople();
+        IEnumerable<PersonEntity> GetAllPeople(Func<PersonEntity, bool> rule);
+        PersonEntity GetPerson(int personId);
+        PersonEntity GetPerson(string lastName, string firstName, string patronymic);
+        void InsertPerson(PersonEntity person);
+        void UpdatePerson(PersonEntity person);
         void DeletePerson(int personId);
         void DeletePerson(string lastName, string firstName, string patronymic);
         void Save();

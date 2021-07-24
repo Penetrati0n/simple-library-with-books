@@ -7,32 +7,39 @@ namespace SimpleLibraryWithBooks.Services
 {
     public class BookRepository : IBookRepository
     {
-        private readonly static List<BookModel> _books = new List<BookModel>()
+        private readonly static List<BookEntity> _books = new List<BookEntity>()
         {
-            new BookModel() { Title  = "Горе от ума", Author = "Александр Грибоедов", Genre = "Комедия" },
-            new BookModel() { Title  = "Гордость и предубеждение", Author = "Джейн Остин", Genre = "Роман" },
-            new BookModel() { Title  = "Тёмные начала", Author = "Филип Пулман", Genre = "Фэнтези" },
+            new BookEntity() {  Id = 1, Title  = "Горе от ума", Author = "Александр Грибоедов", Genre = "Комедия" },
+            new BookEntity() {  Id = 2, Title  = "Гордость и предубеждение", Author = "Джейн Остин", Genre = "Роман" },
+            new BookEntity() {  Id = 3, Title  = "Тёмные начала", Author = "Филип Пулман", Genre = "Фэнтези" },
         };
 
-        public IEnumerable<BookModel> GetAllBooks() =>
+        private static int _currentId = _books.Count;
+
+        public IEnumerable<BookEntity> GetAllBooks() =>
             _books;
 
-        public IEnumerable<BookModel> GetAllBooks(Func<BookModel, bool> rule) =>
+        public IEnumerable<BookEntity> GetAllBooks(Func<BookEntity, bool> rule) =>
             _books.Where(rule);
 
-        public BookModel GetBook(int bookId) =>
+        public BookEntity GetBook(int bookId) =>
            _books[bookId];
 
-        public BookModel GetBook(string title, string author) =>
+        public BookEntity GetBook(string title, string author) =>
             _books.Single(b => (b.Title, b.Author) == (title, author));
 
         public void DeleteBook(int bookId) =>
             _books.RemoveAt(bookId);
 
-        public void InsertBook(BookModel book) =>
-            _books.Add(book);
+        public void InsertBook(BookEntity book)
+        {
+            _currentId++;
+            book.Id = _currentId;
 
-        public void UpdateBook(BookModel book)
+            _books.Add(book);
+        }
+
+        public void UpdateBook(BookEntity book)
         { }
 
         public void DeleteBook(string title, string author)

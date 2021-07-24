@@ -7,28 +7,35 @@ namespace SimpleLibraryWithBooks.Services
 {
     public class PersonBookRepository : IPersonBookRepository
     {
-        private readonly static List<PersonBookModel> _personBooks = new List<PersonBookModel>();
+        private readonly static List<PersonBookEntity> _personBooks = new List<PersonBookEntity>();
 
-        public IEnumerable<PersonBookModel> GetAllPersonBooks() =>
+        private static int _currentId = 0;
+
+        public IEnumerable<PersonBookEntity> GetAllPersonBooks() =>
             _personBooks;
 
-        public IEnumerable<PersonBookModel> GetAllPersonBooks(Func<PersonBookModel, bool> rule) =>
+        public IEnumerable<PersonBookEntity> GetAllPersonBooks(Func<PersonBookEntity, bool> rule) =>
             _personBooks.Where(rule);
 
-        public PersonBookModel GetPersonBook(int personBookId) =>
+        public PersonBookEntity GetPersonBook(int personBookId) =>
             _personBooks[personBookId];
 
-        public PersonBookModel GetPersonBook(string lastName, string firtsName, string patronymic, string title, string author) =>
+        public PersonBookEntity GetPersonBook(string lastName, string firtsName, string patronymic, string title, string author) =>
             _personBooks.Single(pb => pb.Person.LastName == lastName &&
                                       pb.Person.FirstName == firtsName &&
                                       pb.Person.Patronymic == patronymic &&
                                       pb.Book.Title == title &&
                                       pb.Book.Author == author);
 
-        public void InsertPersonBook(PersonBookModel personBook) =>
+        public void InsertPersonBook(PersonBookEntity personBook)
+        {
+            _currentId++;
+            personBook.Id = _currentId;
+            
             _personBooks.Add(personBook);
+        }
 
-        public void UpdatePersonBook(PersonBookModel personBook) { }
+        public void UpdatePersonBook(PersonBookEntity personBook) { }
 
         public void DeletePersonBook(int personBookId) =>
             _personBooks.RemoveAt(personBookId);

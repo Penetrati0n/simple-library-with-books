@@ -6,12 +6,12 @@ namespace SimpleLibraryWithBooks.Services
 {
     public interface IBookRepository
     {
-        IEnumerable<BookModel> GetAllBooks();
-        IEnumerable<BookModel> GetAllBooks(Func<BookModel, bool> rule);
-        BookModel GetBook(int bookId);
-        BookModel GetBook(string title, string author);
-        void InsertBook(BookModel book);
-        void UpdateBook(BookModel book);
+        IEnumerable<BookEntity> GetAllBooks();
+        IEnumerable<BookEntity> GetAllBooks(Func<BookEntity, bool> rule);
+        BookEntity GetBook(int bookId);
+        BookEntity GetBook(string title, string author);
+        void InsertBook(BookEntity book);
+        void UpdateBook(BookEntity book);
         void DeleteBook(int bookId);
         void DeleteBook(string title, string author);
         void Save();
