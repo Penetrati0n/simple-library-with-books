@@ -5,13 +5,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SimpleLibraryWithBooks.Models.PersonBook
 {
-    public class PersonBookDto
+    public class PersonBookRequestDto
     {
         [Required]
-        public PersonDto Person { get; set; }
+        public PersonRequestDto Person { get; set; }
 
         [Required]
-        public BookDto Book { get; set; }
+        public BookRequestDto Book { get; set; }
 
         [Required]
         public DateTimeOffset DateTimeReceipt { get; set; }

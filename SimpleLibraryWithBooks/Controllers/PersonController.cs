@@ -1,8 +1,7 @@
-﻿using AutoMapper;
-using System.Buffers;
-using System.Text.Json;
+﻿using Mapster;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using SimpleLibraryWithBooks.Options;
 using SimpleLibraryWithBooks.Services;
 using SimpleLibraryWithBooks.Extensions;
 using SimpleLibraryWithBooks.Models.Person;
@@ -14,29 +13,21 @@ namespace SimpleLibraryWithBooks.Controllers
     public class PersonController : Controller
     {
         private readonly IPeopleRepository _peopleRepository;
-        private readonly Mapper _mapperEntityToDto;
-        private readonly Mapper _mapperDtoToEntity;
 
         public PersonController(IPeopleRepository peopleRepository)
         {
             _peopleRepository = peopleRepository;
-
-            var configEntityToDto = new MapperConfiguration(cfg => cfg.CreateMap<PersonEntity, PersonDto>());
-            _mapperEntityToDto = new Mapper(configEntityToDto);
-
-            var configDtoToEntity = new MapperConfiguration(cfg => cfg.CreateMap<PersonDto, PersonEntity>());
-            _mapperDtoToEntity = new Mapper(configDtoToEntity);
         }
 
         /// <summary>
         /// Get full list of people.
         /// </summary>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonDto"/>, 
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonResponseDto"/>, 
         /// which contains all existing elements.</returns>
         [HttpGet]
-        public IEnumerable<PersonDto> Get()
+        public IEnumerable<PersonResponseDto> Get()
         {
-            var people = _mapperEntityToDto.Map<IEnumerable<PersonDto>>(_peopleRepository.GetAllPeople());
+            var people = _peopleRepository.GetAllPeople().Adapt<IEnumerable<PersonResponseDto>>();
 
             return people;
         }
@@ -45,12 +36,12 @@ namespace SimpleLibraryWithBooks.Controllers
         /// Get a list of people with a given name.
         /// </summary>
         /// <param name="name">The person's name.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonDto"/>,
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonResponseDto"/>,
         /// in which there are elements in which the name equal <paramref name="name"/>.</returns>
         [HttpGet("{name}")]
-        public IEnumerable<PersonDto> Get(string name)
+        public IEnumerable<PersonResponseDto> Get(string name)
         {
-            var people = _mapperEntityToDto.Map<IEnumerable<PersonDto>>(_peopleRepository.GetAllPeople(p => p.FirstName == name));
+            var people = _peopleRepository.GetAllPeople(p => p.FirstName == name).Adapt<IEnumerable<PersonResponseDto>>();
 
             return people;
         }
@@ -59,19 +50,18 @@ namespace SimpleLibraryWithBooks.Controllers
         /// Adds a new person.
         /// </summary>
         /// <param name="person">New person.</param>
-        /// <returns>Returns <see cref="object"/> which contains all existing elements <see cref="PersonDto"/>
-        /// with a new <paramref name="person"/> without <c>Birthday</c> property.</returns>
+        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonResponseDto"/>,
+        /// which contains all existing elements with a new <paramref name="person"/> without <c>Birthday</c> property.</returns>
         [HttpPost]
-        public IActionResult Post([FromBody] PersonDto person)
+        public ActionResult<IEnumerable<PersonResponseDto>> Post([FromBody] PersonRequestDto person)
         {
             person.Birthday = person.Birthday.SubstringTicks().ChangeTimeZone();
-            var personEntity = _mapperDtoToEntity.Map<PersonEntity>(person);
-            _peopleRepository.InsertPerson(personEntity);
+            _peopleRepository.InsertPerson(person.Adapt<PersonEntity>());
             _peopleRepository.Save();
 
-            var buffer = GetUtf8JsonBytes(_mapperEntityToDto.Map<IEnumerable<PersonDto>>(_peopleRepository.GetAllPeople()));
+            var responsePeople = _peopleRepository.GetAllPeople().Adapt<IEnumerable<PersonResponseDto>>(MapperConfigs.ForPeople);
 
-            return Ok(JsonSerializer.Deserialize<object>(buffer.WrittenSpan));
+            return Json(responsePeople, SerializerOptions.WhenWritingDefault);
         }
 
         /// <summary>
@@ -94,41 +84,6 @@ namespace SimpleLibraryWithBooks.Controllers
             _peopleRepository.Save();
 
             return Ok();
-        }
-
-        /// <summary>
-        /// Creates and writes a list of <see cref="PersonDto"/> to the buffer.
-        /// </summary>
-        /// <param name="people">List of <see cref="PersonDto"/>.</param>
-        /// <returns>Buffer with a json representation of the <paramref name="people"/>.</returns>
-        private static ArrayBufferWriter<byte> GetUtf8JsonBytes(IEnumerable<PersonDto> people)
-        {
-            var buffer = new ArrayBufferWriter<byte>();
-            var writer = new Utf8JsonWriter(buffer);
-
-            writer.WriteStartArray();
-            foreach (var p in people)
-            {
-                WritePerson(writer, p);
-            }
-            writer.WriteEndArray();
-            writer.Flush();
-
-            return buffer;
-        }
-
-        /// <summary>
-        /// Writes a person to the buffer.
-        /// </summary>
-        /// <param name="writer">The writer with which to record the <paramref name="person"/>.</param>
-        /// <param name="person">The person to be written to the buffer.</param>
-        public static void WritePerson(Utf8JsonWriter writer, PersonDto person)
-        {
-            writer.WriteStartObject();
-            writer.WriteString("lastName", person.LastName);
-            writer.WriteString("firstName", person.FirstName);
-            writer.WriteString("patronymic", person.Patronymic);
-            writer.WriteEndObject();
         }
     }
 }
