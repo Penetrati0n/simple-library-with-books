@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Database.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using SimpleLibraryWithBooks.Options;
@@ -55,6 +56,9 @@ namespace SimpleLibraryWithBooks.Controllers
         [HttpPost]
         public ActionResult<IEnumerable<PersonResponseDto>> Post([FromBody] PersonRequestDto person)
         {
+            if (_peopleRepository.Contains(person.LastName, person.FirstName, person.Patronymic))
+                return BadRequest("The person already exists.");
+
             person.Birthday = person.Birthday.SubstringTicks().ChangeTimeZone();
             _peopleRepository.InsertPerson(person.Adapt<PersonEntity>());
             _peopleRepository.Save();

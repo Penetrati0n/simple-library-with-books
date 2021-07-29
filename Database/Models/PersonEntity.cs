@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SimpleLibraryWithBooks.Models.Person
+namespace Database.Models
 {
     public class PersonEntity
     {

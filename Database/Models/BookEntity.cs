@@ -1,4 +1,4 @@
-﻿namespace SimpleLibraryWithBooks.Models.Book
+﻿namespace Database.Models
 {
     public class BookEntity
     {

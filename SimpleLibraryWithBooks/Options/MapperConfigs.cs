@@ -1,5 +1,6 @@
 ﻿using System;
 using Mapster;
+using Database.Models;
 using SimpleLibraryWithBooks.Models.Book;
 using SimpleLibraryWithBooks.Models.Person;
 using SimpleLibraryWithBooks.Models.PersonBook;

@@ -1,57 +1,51 @@
 ﻿using System;
+using Database;
 using System.Linq;
+using Database.Models;
 using System.Collections.Generic;
-using SimpleLibraryWithBooks.Models.Person;
+using Microsoft.EntityFrameworkCore;
 
 namespace SimpleLibraryWithBooks.Services
 {
     public class PeopleRepository : IPeopleRepository
     {
-        private static readonly List<PersonEntity> _people = new List<PersonEntity>()
-        {
-            new PersonEntity() { Id = 1, LastName = "Кармазин", FirstName = "Лев", Patronymic = "Олегович", Birthday = DateTimeOffset.Parse("12/03/1983")},
-            new PersonEntity() { Id = 2, LastName = "Тихомиров", FirstName = "Филипп", Patronymic = "Михайлович", Birthday = DateTimeOffset.Parse("17/09/1980")},
-            new PersonEntity() { Id = 3, LastName = "Травникова", FirstName = "Мариетта", Patronymic = "Платоновна", Birthday = DateTimeOffset.Parse("03/07/2001")},
-        };
+        private readonly DatabaseContext _context;
 
-        private static int _currentId = _people.Count;
+        public PeopleRepository(DbContextOptions<DatabaseContext> options) =>
+            _context = new DatabaseContext(options);
 
         public IEnumerable<PersonEntity> GetAllPeople() =>
-            _people;
+            _context.People;
 
         public IEnumerable<PersonEntity> GetAllPeople(Func<PersonEntity, bool> rule) =>
-            _people.Where(rule);
+            _context.People.Where(rule);
 
         public PersonEntity GetPerson(int personId) =>
-           _people[personId];
+           _context.People.Single(p => p.Id == personId);
 
         public PersonEntity GetPerson(string lastName, string firstName, string patronymic) =>
-            _people.Single(p => (p.LastName, p.FirstName, p.Patronymic) == (lastName, firstName, patronymic));
+            _context.People.Single(p => p.LastName == lastName &&
+                                        p.FirstName == firstName &&
+                                        p.Patronymic == patronymic);
 
         public void DeletePerson(int personId) =>
-            _people.RemoveAt(personId);
+            _context.People.Remove(GetPerson(personId));
 
-        public void InsertPerson(PersonEntity person)
-        {
-            _currentId++;
-            person.Id = _currentId;
+        public void DeletePerson(string lastName, string firstName, string patronymic) =>
+            _context.People.Remove(GetPerson(lastName, firstName, patronymic));
 
-            _people.Add(person);
-        }
+        public void InsertPerson(PersonEntity person) =>
+            _context.People.Add(person);
 
-        public void UpdatePerson(PersonEntity person)
-        { }
+        public void UpdatePerson(PersonEntity person) =>
+            _context.Entry(person).State = EntityState.Modified;
 
-        public void DeletePerson(string lastName, string firstName, string patronymic)
-        {
-            var person = GetPerson(lastName, firstName, patronymic);
-            _people.Remove(person);
-        }
-
-        public void Save()
-        { }
+        public void Save() =>
+            _context.SaveChanges();
 
         public bool Contains(string lastName, string firstName, string patronymic) =>
-            _people.Any(p => (p.LastName, p.FirstName, p.Patronymic) == (lastName, firstName, patronymic));
+            _context.People.Any(p => p.LastName == lastName &&
+                                     p.FirstName == firstName &&
+                                     p.Patronymic == patronymic);
     }
 }

@@ -1,57 +1,49 @@
 ﻿using System;
+using Database;
 using System.Linq;
+using Database.Models;
 using System.Collections.Generic;
-using SimpleLibraryWithBooks.Models.Book;
+using Microsoft.EntityFrameworkCore;
 
 namespace SimpleLibraryWithBooks.Services
 {
     public class BookRepository : IBookRepository
     {
-        private readonly static List<BookEntity> _books = new List<BookEntity>()
-        {
-            new BookEntity() {  Id = 1, Title  = "Горе от ума", Author = "Александр Грибоедов", Genre = "Комедия" },
-            new BookEntity() {  Id = 2, Title  = "Гордость и предубеждение", Author = "Джейн Остин", Genre = "Роман" },
-            new BookEntity() {  Id = 3, Title  = "Тёмные начала", Author = "Филип Пулман", Genre = "Фэнтези" },
-        };
+        private readonly DatabaseContext _context;
 
-        private static int _currentId = _books.Count;
+        public BookRepository(DbContextOptions<DatabaseContext> options) =>
+            _context = new DatabaseContext(options);
 
         public IEnumerable<BookEntity> GetAllBooks() =>
-            _books;
+            _context.Books;
 
         public IEnumerable<BookEntity> GetAllBooks(Func<BookEntity, bool> rule) =>
-            _books.Where(rule);
+            _context.Books.Where(rule);
 
         public BookEntity GetBook(int bookId) =>
-           _books[bookId];
+           _context.Books.Single(b => b.Id == bookId);
 
         public BookEntity GetBook(string title, string author) =>
-            _books.Single(b => (b.Title, b.Author) == (title, author));
+            _context.Books.Single(b => b.Title == title &&
+                                       b.Author == author);
 
         public void DeleteBook(int bookId) =>
-            _books.RemoveAt(bookId);
+            _context.Books.Remove(GetBook(bookId));
 
-        public void InsertBook(BookEntity book)
-        {
-            _currentId++;
-            book.Id = _currentId;
+        public void DeleteBook(string title, string author) =>
+            _context.Books.Remove(GetBook(title, author));
 
-            _books.Add(book);
-        }
+        public void InsertBook(BookEntity book) =>
+            _context.Books.Add(book);
 
-        public void UpdateBook(BookEntity book)
-        { }
+        public void UpdateBook(BookEntity book) =>
+            _context.Entry(book).State = EntityState.Modified;
 
-        public void DeleteBook(string title, string author)
-        {
-            var book = GetBook(title, author);
-            _books.Remove(book);
-        }
-
-        public void Save()
-        { }
+        public void Save() =>
+            _context.SaveChanges();
 
         public bool Contains(string title, string author) =>
-            _books.Any(b => (b.Title, b.Author) == (title, author));
+            _context.Books.Any(b => b.Title == title &&
+                                    b.Author == author);
     }
 }

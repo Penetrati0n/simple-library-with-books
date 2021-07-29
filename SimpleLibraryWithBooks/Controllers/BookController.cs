@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Database.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using SimpleLibraryWithBooks.Options;
@@ -54,6 +55,9 @@ namespace SimpleLibraryWithBooks.Controllers
         [HttpPost]
         public ActionResult<IEnumerable<BookResponseDto>> Post([FromBody] BookRequestDto book)
         {
+            if (_bookRepository.Contains(book.Title, book.Author))
+                return BadRequest("The book already exists.");
+
             _bookRepository.InsertBook(book.Adapt<BookEntity>());
             _bookRepository.Save();
 

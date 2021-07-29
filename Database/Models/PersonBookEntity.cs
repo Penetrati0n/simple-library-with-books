@@ -1,11 +1,11 @@
 ﻿using System;
-using SimpleLibraryWithBooks.Models.Book;
-using SimpleLibraryWithBooks.Models.Person;
+using System.ComponentModel.DataAnnotations;
 
-namespace SimpleLibraryWithBooks.Models.PersonBook
+namespace Database.Models
 {
     public class PersonBookEntity
     {
+        [Key]
         public int Id { get; set; }
 
         public PersonEntity Person { get; set; }

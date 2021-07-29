@@ -1,4 +1,5 @@
 using System;
+using Database;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using SimpleLibraryWithBooks.Services;
 using Microsoft.AspNetCore.HttpsPolicy;
 using SimpleLibraryWithBooks.Extensions;
@@ -28,6 +30,9 @@ namespace SimpleLibraryWithBooks
         public void ConfigureServices(IServiceCollection services)
         {
             services.InitOptions();
+
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<DatabaseContext>(option => option.UseNpgsql(connectionString));
 
             services.AddScoped<IBookRepository, BookRepository>();
             services.AddScoped<IPeopleRepository, PeopleRepository>();

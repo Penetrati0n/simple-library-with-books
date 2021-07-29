@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Database.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using SimpleLibraryWithBooks.Options;
@@ -41,6 +42,12 @@ namespace SimpleLibraryWithBooks.Controllers
                 return BadRequest("Person is not found.");
             if (!_bookRepository.Contains(bookFromBody.Title, bookFromBody.Author))
                 return BadRequest("Book is not found.");
+            if (_personBookRepository.Contains(personFromBody.LastName,
+                                               personFromBody.FirstName,
+                                               personFromBody.Patronymic,
+                                               bookFromBody.Title,
+                                               bookFromBody.Author))
+                return BadRequest("The PersonBook already exists.");
 
             var person = _peopleRepository.GetPerson(personFromBody.LastName, personFromBody.FirstName, personFromBody.Patronymic);
             var book = _bookRepository.GetBook(bookFromBody.Title, bookFromBody.Author);

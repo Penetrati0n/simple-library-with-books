@@ -1,6 +1,6 @@
 ﻿using System;
+using Database.Models;
 using System.Collections.Generic;
-using SimpleLibraryWithBooks.Models.Book;
 
 namespace SimpleLibraryWithBooks.Services
 {
