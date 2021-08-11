@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleLibraryWithBooks", "SimpleLibraryWithBooks\SimpleLibraryWithBooks.csproj", "{A57559CF-B733-4A95-BEE6-6F0D2E69D7FE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleLibraryWithBooks", "SimpleLibraryWithBooks\SimpleLibraryWithBooks.csproj", "{A57559CF-B733-4A95-BEE6-6F0D2E69D7FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Database\Database.csproj", "{4C4E0EF4-A00D-4965-8466-4FEABFEC22D3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{A57559CF-B733-4A95-BEE6-6F0D2E69D7FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A57559CF-B733-4A95-BEE6-6F0D2E69D7FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A57559CF-B733-4A95-BEE6-6F0D2E69D7FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C4E0EF4-A00D-4965-8466-4FEABFEC22D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C4E0EF4-A00D-4965-8466-4FEABFEC22D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C4E0EF4-A00D-4965-8466-4FEABFEC22D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C4E0EF4-A00D-4965-8466-4FEABFEC22D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
