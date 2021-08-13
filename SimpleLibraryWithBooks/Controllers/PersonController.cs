@@ -2,10 +2,8 @@
 using Database.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using SimpleLibraryWithBooks.Options;
+using SimpleLibraryWithBooks.Models;
 using SimpleLibraryWithBooks.Services;
-using SimpleLibraryWithBooks.Extensions;
-using SimpleLibraryWithBooks.Models.Person;
 
 namespace SimpleLibraryWithBooks.Controllers
 {
@@ -13,79 +11,93 @@ namespace SimpleLibraryWithBooks.Controllers
     [ApiController]
     public class PersonController : Controller
     {
-        private readonly IPeopleRepository _peopleRepository;
+        private readonly IPeopleService _peopleService;
 
-        public PersonController(IPeopleRepository peopleRepository)
+        public PersonController(IPeopleService peopleService)
         {
-            _peopleRepository = peopleRepository;
+            _peopleService = peopleService;
         }
 
-        /// <summary>
-        /// Get full list of people.
-        /// </summary>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of the type <see cref="PersonResponseDto"/>, 
-        /// which contains all existing elements.</returns>
         [HttpGet]
-        public IEnumerable<PersonResponseDto> Get()
+        public IEnumerable<Person.Response> GetPeople()
         {
-            var people = _peopleRepository.GetAllPeople().Adapt<IEnumerable<PersonResponseDto>>();
+            var personEntities = _peopleService.GetAll();
+            var personReponse = personEntities.Adapt<IEnumerable<Person.Response>>();
 
-            return people;
+            return personReponse;
         }
 
-        /// <summary>
-        /// Get a list of people with a given name.
-        /// </summary>
-        /// <param name="name">The person's name.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonResponseDto"/>,
-        /// in which there are elements in which the name equal <paramref name="name"/>.</returns>
-        [HttpGet("{name}")]
-        public IEnumerable<PersonResponseDto> Get(string name)
+        [HttpGet("{firstName}&{lastName}&{middleName}")]
+        public IEnumerable<Person.Response> GetPeople(string firstName, string middleName, string lastName)
         {
-            var people = _peopleRepository.GetAllPeople(p => p.FirstName == name).Adapt<IEnumerable<PersonResponseDto>>();
+            var personEntities = _peopleService.GetAll(firstName, middleName, lastName);
+            var personReponse = personEntities.Adapt<IEnumerable<Person.Response>>();
 
-            return people;
+            return personReponse;
         }
 
-        /// <summary>
-        /// Adds a new person.
-        /// </summary>
-        /// <param name="person">New person.</param>
-        /// <returns>Returns <see cref="IEnumerable{T}"/> of type <see cref="PersonResponseDto"/>,
-        /// which contains all existing elements with a new <paramref name="person"/> without <c>Birthday</c> property.</returns>
-        [HttpPost]
-        public ActionResult<IEnumerable<PersonResponseDto>> Post([FromBody] PersonRequestDto person)
+        [HttpGet("{id}")]
+        public ActionResult<Person.Response> GetPerson(int id)
         {
-            if (_peopleRepository.Contains(person.LastName, person.FirstName, person.Patronymic))
-                return BadRequest("The person already exists.");
-
-            person.Birthday = person.Birthday.SubstringTicks().ChangeTimeZone();
-            _peopleRepository.InsertPerson(person.Adapt<PersonEntity>());
-            _peopleRepository.Save();
-
-            var responsePeople = _peopleRepository.GetAllPeople().Adapt<IEnumerable<PersonResponseDto>>(MapperConfigs.ForPeople);
-
-            return Json(responsePeople, SerializerOptions.WhenWritingDefault);
-        }
-
-        /// <summary>
-        /// Deletes a person.
-        /// </summary>
-        /// <param name="lastName">Last name of person.</param>
-        /// <param name="firstName">First name of person.</param>
-        /// <param name="patronymic">Patronymic name of person.</param>
-        /// <returns><list type="bullet">
-        /// <item><term><see cref="OkResult"/></term><description> the person was successfully deleted.</description></item>
-        /// <item><term><see cref="NotFoundResult"/></term><description> the person was not found</description></item>
-        /// </list></returns>
-        [HttpDelete("{lastName}&{firstName}&{patronymic}")]
-        public IActionResult Delete(string lastName, string firstName, string patronymic)
-        {
-            if (!_peopleRepository.Contains(lastName, firstName, patronymic))
+            if (!_peopleService.Contains(id))
                 return NotFound();
 
-            _peopleRepository.DeletePerson(lastName, firstName, patronymic);
-            _peopleRepository.Save();
+            var personEntity = _peopleService.Get(id);
+            var personResponse = personEntity.Adapt<Person.Response>();
+
+            return Ok(personResponse);
+        }
+
+        [HttpPost]
+        public ActionResult<Person.Response> AddPerson([FromBody] Person.Request.Create personRequest)
+        {
+            if (_peopleService.Contains(personRequest.FirstName, personRequest.MiddleName, personRequest.LastName, personRequest.Birthday))
+                return BadRequest("The person already exists.");
+
+            var personEntity = personRequest.Adapt<PersonEntity>();
+            _peopleService.Insert(personEntity);
+            _peopleService.Save();
+
+            var personResponse = personEntity.Adapt<Person.Response>();
+            
+            return Ok(personResponse);
+        }
+
+        [HttpPut]
+        public ActionResult<Person.Response> UpdatePerson([FromBody] Person.Request.Update personRequest)
+        {
+            if (!_peopleService.Contains(personRequest.Id))
+                return NotFound();
+
+            var personEntity = personRequest.Adapt<PersonEntity>();
+            _peopleService.Update(personEntity);
+            _peopleService.Save();
+
+            var personResponse = personEntity.Adapt<Person.Response>();
+
+            return personResponse;
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult DeletePerson(int id)
+        {
+            if (!_peopleService.Contains(id))
+                return NotFound();
+
+            _peopleService.Delete(id);
+            _peopleService.Save();
+
+            return Ok();
+        }
+
+        [HttpDelete("{firstName}&{middleName}&{lastName}")]
+        public ActionResult DeletePeople(string firstName, string middleName, string lastName)
+        {
+            if (!_peopleService.Contains(firstName, middleName, lastName))
+                return NotFound();
+
+            _peopleService.Delete(firstName, middleName, lastName);
+            _peopleService.Save();
 
             return Ok();
         }
