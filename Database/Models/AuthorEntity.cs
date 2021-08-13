@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Database.Models
 {
     [Table("author")]
-    public class AuthorEntity
+    public class AuthorEntity : Expansion
     {
         [Column("author_id")]
         public int Id { get; set; }

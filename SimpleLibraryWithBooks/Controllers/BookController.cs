@@ -75,12 +75,9 @@ namespace SimpleLibraryWithBooks.Controllers
                 return BadRequest("There are no such genres.");
 
             var bookEntity = bookRequest.Adapt<BookEntity>();
-            bookEntity.Genres.Clear(); ;
+            bookEntity.Genres = bookRequest.Genres.Select(g => new GenreEntity() { Id = g.Id }).ToList();
             _bookService.Insert(bookEntity);
             _bookService.Save();
-            foreach (var genre in bookRequest.Genres.ToList())
-                _genreService.Get(genre.Id).Books.Add(bookEntity);
-            _genreService.Save();
 
             var bookResponse = bookEntity.Adapt<Book.Response.Without.People>();
             bookResponse.Author = _authorService.Get(bookEntity.AuthorId).Adapt<Author.Response>();

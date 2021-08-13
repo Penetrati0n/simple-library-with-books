@@ -49,12 +49,30 @@ namespace SimpleLibraryWithBooks.Services
         public bool Contains(int authorId) =>
             _context.Authors.Any(a => a.Id == authorId);
 
-        public bool Contains(string firstName, string middleName, string lastName)=>
+        public bool Contains(string firstName, string middleName, string lastName) =>
             _context.Authors.Any(a => a.FirstName == firstName &&
                                       a.MiddleName == middleName &&
                                       a.LastName == lastName);
 
-        public void Save() =>
+        public void Save()
+        {
+            var entries = _context.ChangeTracker.Entries();
+            foreach (var entry in entries.Where(e => e.State == EntityState.Added))
+            {
+                var entity = entry.Entity as Expansion;
+                if (entity is null) continue;
+                entity.TimeCreate = DateTimeOffset.Now;
+                entity.TimeEdit = entity.TimeCreate;
+                entity.Version = 1;
+            }
+            foreach (var entry in entries.Where(e => e.State == EntityState.Modified))
+            {
+                var entity = entry.Entity as Expansion;
+                if (entity is null) continue;
+                entity.TimeEdit = DateTimeOffset.Now;
+                entity.Version++;
+            }
             _context.SaveChanges();
+        }
     }
 }

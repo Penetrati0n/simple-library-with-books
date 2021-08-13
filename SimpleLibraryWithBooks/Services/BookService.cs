@@ -29,8 +29,14 @@ namespace SimpleLibraryWithBooks.Services
         public BookEntity Get(string bookName, int authorId) =>
             GetAll().Single(b => b.Name == bookName && b.AuthorId == authorId);
 
-        public void Insert(BookEntity book) =>
+        public void Insert(BookEntity book)
+        {
+            var genres = book.Genres.ToList();
+            book.Genres.Clear();
             _context.Books.Add(book);
+            foreach (var genre in genres)
+                _context.Genres.Single(g => g.Id == genre.Id).Books.Add(book);
+        }
 
         public void Update(BookEntity book)
         {
@@ -64,7 +70,25 @@ namespace SimpleLibraryWithBooks.Services
         public bool Contains(string bookName, int authorId) =>
             _context.Books.Any(b => b.Name == bookName && b.AuthorId == authorId);
 
-        public void Save() =>
+        public void Save()
+        {
+            var entries = _context.ChangeTracker.Entries();
+            foreach (var entry in entries.Where(e => e.State == EntityState.Added))
+            {
+                var entity = entry.Entity as Expansion;
+                if (entity is null) continue;
+                entity.TimeCreate = DateTimeOffset.Now;
+                entity.TimeEdit = entity.TimeCreate;
+                entity.Version = 1;
+            }
+            foreach (var entry in entries.Where(e => e.State == EntityState.Modified))
+            {
+                var entity = entry.Entity as Expansion;
+                if (entity is null) continue;
+                entity.TimeEdit = DateTimeOffset.Now;
+                entity.Version++;
+            }
             _context.SaveChanges();
+        }
     }
 }

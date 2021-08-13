@@ -48,7 +48,25 @@ namespace SimpleLibraryWithBooks.Services
         public bool Contains(string genreName) =>
             _context.Genres.Any(g => g.Name == genreName);
 
-        public void Save() =>
+        public void Save()
+        {
+            var entries = _context.ChangeTracker.Entries();
+            foreach (var entry in entries.Where(e => e.State == EntityState.Added))
+            {
+                var entity = entry.Entity as Expansion;
+                if (entity is null) continue;
+                entity.TimeCreate = DateTimeOffset.Now;
+                entity.TimeEdit = entity.TimeCreate;
+                entity.Version = 1;
+            }
+            foreach (var entry in entries.Where(e => e.State == EntityState.Modified))
+            {
+                var entity = entry.Entity as Expansion;
+                if (entity is null) continue;
+                entity.TimeEdit = DateTimeOffset.Now;
+                entity.Version++;
+            }
             _context.SaveChanges();
+        }
     }
 }

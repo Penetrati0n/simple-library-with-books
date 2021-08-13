@@ -11,18 +11,18 @@ namespace SimpleLibraryWithBooks.Models
             {
                 [Required]
                 [MaxLength(100)]
-                [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                     ErrorMessage = "The First Name field contains invalid characters.")]
                 public string FirstName { get; set; }
 
                 [MaxLength(100)]
-                [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                     ErrorMessage = "The First Name field contains invalid characters.")]
                 public string MiddleName { get; set; }
 
                 [Required]
                 [MaxLength(100)]
-                [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                     ErrorMessage = "The First Name field contains invalid characters.")]
                 public string LastName { get; set; }
 
@@ -30,18 +30,18 @@ namespace SimpleLibraryWithBooks.Models
                 {
                     [Required]
                     [MaxLength(100)]
-                    [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                    [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                         ErrorMessage = "The First Name field contains invalid characters.")]
                     public string FirstName { get; set; }
 
                     [MaxLength(100)]
-                    [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                    [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                         ErrorMessage = "The First Name field contains invalid characters.")]
                     public string MiddleName { get; set; }
 
                     [Required]
                     [MaxLength(100)]
-                    [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                    [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                         ErrorMessage = "The First Name field contains invalid characters.")]
                     public string LastName { get; set; }
 
@@ -62,18 +62,18 @@ namespace SimpleLibraryWithBooks.Models
 
                 [Required]
                 [MaxLength(100)]
-                [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                     ErrorMessage = "The First Name field contains invalid characters.")]
                 public string FirstName { get; set; }
 
                 [MaxLength(100)]
-                [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                     ErrorMessage = "The First Name field contains invalid characters.")]
                 public string MiddleName { get; set; }
 
                 [Required]
                 [MaxLength(100)]
-                [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                     ErrorMessage = "The First Name field contains invalid characters.")]
                 public string LastName { get; set; }
             }
@@ -81,17 +81,17 @@ namespace SimpleLibraryWithBooks.Models
             public class FilterForBooks
             {
                 [MaxLength(100)]
-                [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                     ErrorMessage = "The First Name field contains invalid characters.")]
                 public string FirstName { get; set; }
 
                 [MaxLength(100)]
-                [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                     ErrorMessage = "The First Name field contains invalid characters.")]
                 public string MiddleName { get; set; }
 
                 [MaxLength(100)]
-                [RegularExpression("^([A-ZÀ-ÿА-ЯЁ][-,a-zа-яё. ']+[ ]*)+$",
+                [RegularExpression("^[\\w'\\-,.][^0-9_!¡?÷?¿\\/\\+=@#$%ˆ&*(){}|~<>;:[\\]]{2,}$",
                     ErrorMessage = "The First Name field contains invalid characters.")]
                 public string LastName { get; set; }
             }

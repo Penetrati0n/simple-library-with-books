@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Database.Models
 {
     [Table("person")]
-    public class PersonEntity
+    public class PersonEntity : Expansion
     {
         [Column("person_id")]
         public int Id { get; set; }

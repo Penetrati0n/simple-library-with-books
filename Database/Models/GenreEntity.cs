@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Database.Models
 {
     [Table("dim_genre")]
-    public class GenreEntity
+    public class GenreEntity : Expansion
     {
         [Column("genre_id")]
         public int Id { get; set; }
