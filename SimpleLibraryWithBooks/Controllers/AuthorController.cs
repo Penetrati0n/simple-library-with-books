@@ -107,11 +107,15 @@ namespace SimpleLibraryWithBooks.Controllers
         {
             if (!_authorService.Contains(authorId))
                 return NotFound();
-            else if (_bookService.GetAll(b => b.AuthorId == authorId).Any())
-                return BadRequest("You can't delete an author when they have books.");
+            else if (_bookService.GetAll(b => b.AuthorId == authorId).Any(b => b.People.Any()))
+                return BadRequest("You can't delete the author and his books, because the user has 1 or more.");
 
             _authorService.Delete(authorId);
             _authorService.Save();
+            var bookEntities = _bookService.GetAll(b => b.AuthorId == authorId);
+            foreach (var book in bookEntities)
+                _bookService.Delete(book.Id);
+            _bookService.Save();
 
             return Ok();
         }
