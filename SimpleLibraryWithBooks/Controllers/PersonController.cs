@@ -1,8 +1,10 @@
 ﻿using Mapster;
+using System.Linq;
 using Database.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using SimpleLibraryWithBooks.Models;
+using SimpleLibraryWithBooks.Options;
 using SimpleLibraryWithBooks.Services;
 
 namespace SimpleLibraryWithBooks.Controllers
@@ -12,10 +14,12 @@ namespace SimpleLibraryWithBooks.Controllers
     public class PersonController : Controller
     {
         private readonly IPeopleService _peopleService;
+        private readonly ILibraryCardService _libraryCardService;
 
-        public PersonController(IPeopleService peopleService)
+        public PersonController(IPeopleService peopleService, ILibraryCardService libraryCardService)
         {
             _peopleService = peopleService;
+            _libraryCardService = libraryCardService;
         }
 
         [HttpGet]
@@ -44,6 +48,19 @@ namespace SimpleLibraryWithBooks.Controllers
 
             var personEntity = _peopleService.Get(id);
             var personResponse = personEntity.Adapt<Person.Response>();
+
+            return Ok(personResponse);
+        }
+
+        [HttpGet("[action]/{personId}")]
+        public ActionResult<IEnumerable<Person.Response.WithBooks>> GetPersonBooks(int personId)
+        {
+            if (!_peopleService.Contains(personId))
+                return BadRequest("The person does not exist");
+
+            var libraryCardEntities = _libraryCardService.GetAll(lc => lc.PersonId == personId);
+            var personResponse = libraryCardEntities.First().Person.Adapt<Person.Response.WithBooks>();
+            personResponse.Books = libraryCardEntities.Adapt<IEnumerable<LibraryCard.Response.WithOutPerson>>(MapperConfigs.ForLibraryCard);
 
             return Ok(personResponse);
         }

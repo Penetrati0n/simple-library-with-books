@@ -25,11 +25,11 @@ namespace Database.Models
         [Column("birth_date")]
         public DateTimeOffset Birthday { get; set; }
 
-        public ICollection<BookEntity> Books { get; set; }
+        public ICollection<LibraryCardEntity> LibraryCards { get; set; }
 
         public PersonEntity()
         {
-            Books = new List<BookEntity>();
+            LibraryCards = new List<LibraryCardEntity>();
         }
     }
 }

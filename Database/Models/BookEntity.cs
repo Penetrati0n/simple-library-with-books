@@ -21,12 +21,12 @@ namespace Database.Models
 
         public ICollection<GenreEntity> Genres { get; set; }
 
-        public ICollection<PersonEntity> People { get; set; }
+        public ICollection<LibraryCardEntity> LibraryCards { get; set; }
 
         public BookEntity()
         {
             Genres = new List<GenreEntity>();
-            People = new List<PersonEntity>();
+            LibraryCards = new List<LibraryCardEntity>();
         }
     }
 }

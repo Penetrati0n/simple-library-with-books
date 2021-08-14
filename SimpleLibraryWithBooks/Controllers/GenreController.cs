@@ -29,7 +29,7 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpGet]
-        [Route("GetStatistics")]
+        [Route("[action]")]
         public IEnumerable<Genre.Response.Statistic> GetStatistics()
         {
             var genresResponse = _genreService.GetAll().Adapt<IEnumerable<Genre.Response.Statistic>>(MapperConfigs.ForGenreStatistic);

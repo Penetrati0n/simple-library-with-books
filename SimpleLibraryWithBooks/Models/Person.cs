@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace SimpleLibraryWithBooks.Models
@@ -68,6 +69,30 @@ namespace SimpleLibraryWithBooks.Models
             public string MiddleName { get; set; }
             public string LastName { get; set; }
             public DateTimeOffset Birthday { get; set; }
+
+            public class WithBooks
+            {
+                public int Id { get; set; }
+                public string FirstName { get; set; }
+                public string MiddleName { get; set; }
+                public string LastName { get; set; }
+                public DateTimeOffset Birthday { get; set; }
+                public IEnumerable<LibraryCard.Response.WithOutPerson> Books { get; set; }
+                public WithBooks()
+                {
+                    Books = new List<LibraryCard.Response.WithOutPerson>();
+                }
+            }
+
+            public class WithBook
+            {
+                public int Id { get; set; }
+                public string FirstName { get; set; }
+                public string MiddleName { get; set; }
+                public string LastName { get; set; }
+                public DateTimeOffset Birthday { get; set; }
+                public LibraryCard.Response.WithOutPerson Book { get; set; }
+            }
         }
     }
 }

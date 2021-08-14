@@ -37,6 +37,7 @@ namespace SimpleLibraryWithBooks
             services.AddScoped<IPeopleService, PeopleService>();
             services.AddScoped<IGenreService, GenreService>();
             services.AddScoped<IAuthorService, AuthorService>();
+            services.AddScoped<ILibraryCardService, LibraryCardService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

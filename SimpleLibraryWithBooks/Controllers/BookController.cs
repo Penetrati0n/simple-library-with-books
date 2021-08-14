@@ -122,7 +122,7 @@ namespace SimpleLibraryWithBooks.Controllers
         {
             if (!_bookService.Contains(bookId))
                 return NotFound("The book does not exist.");
-            else if (_bookService.Get(bookId).People.Any())
+            else if (_bookService.Get(bookId).LibraryCards.Any())
                 return BadRequest("Deletion is not possible. This book is in the possession of a person.");
 
             _bookService.Delete(bookId);

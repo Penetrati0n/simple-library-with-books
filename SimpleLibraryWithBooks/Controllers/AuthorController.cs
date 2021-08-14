@@ -107,7 +107,7 @@ namespace SimpleLibraryWithBooks.Controllers
         {
             if (!_authorService.Contains(authorId))
                 return NotFound();
-            else if (_bookService.GetAll(b => b.AuthorId == authorId).Any(b => b.People.Any()))
+            else if (_bookService.GetAll(b => b.AuthorId == authorId).Any(b => b.LibraryCards.Any()))
                 return BadRequest("You can't delete the author and his books, because the user has 1 or more.");
 
             _authorService.Delete(authorId);

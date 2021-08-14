@@ -60,15 +60,19 @@ namespace SimpleLibraryWithBooks.Services
             foreach (var entry in entries.Where(e => e.State == EntityState.Added))
             {
                 var entity = entry.Entity as Expansion;
-                if (entity is null) continue;
+                if (entity is null)
+                    continue;
                 entity.TimeCreate = DateTimeOffset.Now;
                 entity.TimeEdit = entity.TimeCreate;
                 entity.Version = 1;
+                if (entry.Entity is LibraryCardExpansion)
+                    (entry.Entity as LibraryCardExpansion).TimeReturn = entity.TimeCreate.AddDays(7);
             }
             foreach (var entry in entries.Where(e => e.State == EntityState.Modified))
             {
                 var entity = entry.Entity as Expansion;
-                if (entity is null) continue;
+                if (entity is null)
+                    continue;
                 entity.TimeEdit = DateTimeOffset.Now;
                 entity.Version++;
             }

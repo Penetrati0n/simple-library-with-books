@@ -9,13 +9,14 @@ namespace Database
         public DbSet<BookEntity> Books { get; set; }
         public DbSet<GenreEntity> Genres { get; set; }
         public DbSet<PersonEntity> People { get; set; }
+        public DbSet<LibraryCardEntity> LibraryCards { get; set; }
 
         public DatabaseContext() { }
 
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options)
         {
-            Database.EnsureCreated();
+            Database.Migrate();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,22 +38,8 @@ namespace Database
                 b.ToTable("book_genre_lnk");
             });
 
-            modelBuilder.Entity("BookEntityPersonEntity", b =>
-            {
-                b.Property<int>("BooksId")
-                    .HasColumnType("integer")
-                    .HasColumnName("book_book_id");
-
-                b.Property<int>("PeopleId")
-                    .HasColumnType("integer")
-                    .HasColumnName("person_person_id");
-
-                b.HasKey("BooksId", "PeopleId");
-
-                b.HasIndex("PeopleId");
-
-                b.ToTable("library_card");
-            });
+            modelBuilder.Entity<LibraryCardEntity>()
+                .HasKey(e => new { e.BookId, e.PersonId });
         }
     }
 }
