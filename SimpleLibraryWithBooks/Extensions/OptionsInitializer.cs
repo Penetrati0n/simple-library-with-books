@@ -7,7 +7,6 @@ namespace SimpleLibraryWithBooks.Extensions
     {
         public static IServiceCollection InitOptions(this IServiceCollection services)
         {
-            SerializerOptions.Init();
             MapperConfigs.Init();
 
             return services;

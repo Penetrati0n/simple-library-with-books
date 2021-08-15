@@ -1,35 +1,34 @@
 ﻿using System;
 using Mapster;
 using Database.Models;
-using SimpleLibraryWithBooks.Models.Book;
-using SimpleLibraryWithBooks.Models.Person;
-using SimpleLibraryWithBooks.Models.PersonBook;
+using SimpleLibraryWithBooks.Models;
 
 namespace SimpleLibraryWithBooks.Options
 {
     public static class MapperConfigs
     {
-        public static TypeAdapterConfig ForBooks { get; private set; }
-        public static TypeAdapterConfig ForPeople { get; private set; }
-        public static TypeAdapterConfig ForPersonBooks { get; private set; }
+        public static TypeAdapterConfig ForGenreStatistic { get; private set; }
+        public static TypeAdapterConfig ForLibraryCard { get; private set; }
+        public static TypeAdapterConfig ForDebetor { get; set; }
 
         public static void Init()
         {
-            ForBooks = new();
-            ForBooks
-                .NewConfig<BookEntity, BookResponseDto>()
-                .Map(dest => dest.Genre, src => default(string));
+            ForGenreStatistic = new();
+            ForGenreStatistic
+                .NewConfig<GenreEntity, Genre.Response.Statistic>()
+                .Map(dest => dest.CountBooks, src => src.Books.Count);
 
-            ForPeople = new();
-            ForPeople
-                .NewConfig<PersonEntity, PersonResponseDto>()
-                .Map(dest => dest.Birthday, src => default(DateTimeOffset));
+            ForLibraryCard = new();
+            ForLibraryCard
+                .NewConfig<LibraryCardEntity, LibraryCard.Response.WithOutPerson>()
+                .Map(dest => dest.Book, src => src.Book.Adapt<Book.Response.Without.All>());
 
-            ForPersonBooks = new();
-            ForPersonBooks
-                .NewConfig<PersonBookEntity, PersonBookResponseDto>()
-                .Map(dest => dest.Person, src => src.Person.Adapt<PersonResponseDto>(ForPeople))
-                .Map(dest => dest.Book, src => src.Book.Adapt<BookResponseDto>(ForBooks));
+            ForDebetor = new();
+            ForDebetor
+                .NewConfig<LibraryCardEntity, LibraryCard.Response.Debetor>()
+                .Map(dest => dest.Person, src => src.Person.Adapt<Person.Response>())
+                .Map(dest => dest.Book, src => src.Book.Adapt<Book.Response.Without.All>())
+                .Map(dest => dest.DaysDelay, src => (DateTimeOffset.Now - src.TimeReturn).TotalDays);
         }
     }
 }

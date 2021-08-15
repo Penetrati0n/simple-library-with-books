@@ -33,15 +33,16 @@ namespace SimpleLibraryWithBooks
 
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<DatabaseContext>(option => option.UseNpgsql(connectionString));
-
-            services.AddScoped<IBookRepository, BookRepository>();
-            services.AddScoped<IPeopleRepository, PeopleRepository>();
-            services.AddScoped<IPersonBookRepository, PersonBookRepository>();
-
+            services.AddScoped<IBookService, BookService>();
+            services.AddScoped<IPeopleService, PeopleService>();
+            services.AddScoped<IGenreService, GenreService>();
+            services.AddScoped<IAuthorService, AuthorService>();
+            services.AddScoped<ILibraryCardService, LibraryCardService>();
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "SimpleLibraryWithBooks", Version = "v1" });
+                c.CustomSchemaIds(type => type.ToString().Replace('+', '.'));
             });
         }
 
