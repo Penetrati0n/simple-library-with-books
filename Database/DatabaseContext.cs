@@ -17,7 +17,7 @@ namespace Database
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options)
         {
-            Database.Migrate();
+            Database.MigrateAsync().Wait();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
