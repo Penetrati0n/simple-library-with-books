@@ -4,8 +4,9 @@ using System.Linq;
 using Database.Models;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Infrastructure.Services.Interfaces;
 
-namespace SimpleLibraryWithBooks.Services
+namespace Infrastructure.Services
 {
     public class BookService : IBookService
     {

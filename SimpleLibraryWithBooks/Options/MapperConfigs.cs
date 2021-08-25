@@ -1,7 +1,7 @@
 ﻿using System;
 using Mapster;
 using Database.Models;
-using SimpleLibraryWithBooks.Models;
+using Common.DataTransferModels;
 
 namespace SimpleLibraryWithBooks.Options
 {

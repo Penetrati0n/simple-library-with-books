@@ -2,10 +2,10 @@
 using System.Linq;
 using Database.Models;
 using Microsoft.AspNetCore.Mvc;
+using Common.DataTransferModels;
 using System.Collections.Generic;
-using SimpleLibraryWithBooks.Models;
 using SimpleLibraryWithBooks.Options;
-using SimpleLibraryWithBooks.Services;
+using Infrastructure.Services.Interfaces;
 
 namespace SimpleLibraryWithBooks.Controllers
 {

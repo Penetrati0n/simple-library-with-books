@@ -2,7 +2,7 @@
 using Database.Models;
 using System.Collections.Generic;
 
-namespace SimpleLibraryWithBooks.Services
+namespace Infrastructure.Services.Interfaces
 {
     public interface IPeopleService
     {
