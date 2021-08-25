@@ -1,7 +1,9 @@
 using System;
 using Database;
 using System.Linq;
+using Database.Interfaces;
 using System.Threading.Tasks;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using System.Collections.Generic;
@@ -10,9 +12,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using SimpleLibraryWithBooks.Services;
 using Microsoft.AspNetCore.HttpsPolicy;
 using SimpleLibraryWithBooks.Extensions;
+using Infrastructure.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -33,6 +35,7 @@ namespace SimpleLibraryWithBooks
 
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<DatabaseContext>(option => option.UseNpgsql(connectionString));
+            services.AddScoped<IDatabaseContext, DatabaseContext>();
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<IPeopleService, PeopleService>();
             services.AddScoped<IGenreService, GenreService>();

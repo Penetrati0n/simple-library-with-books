@@ -2,11 +2,12 @@
 using Mapster;
 using System.Linq;
 using Database.Models;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Common.DataTransferModels;
 using System.Collections.Generic;
-using SimpleLibraryWithBooks.Models;
 using SimpleLibraryWithBooks.Options;
-using SimpleLibraryWithBooks.Services;
+using Infrastructure.Services.Interfaces;
 
 namespace SimpleLibraryWithBooks.Controllers
 {
@@ -26,21 +27,21 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<LibraryCard.Response.Debetor> GetDebetors()
+        public async Task<IEnumerable<LibraryCard.Response.Debetor>> GetDebetors()
         {
-            var libraryCardEntities = _libraryCardService.GetAll(lc => lc.TimeReturn < DateTimeOffset.Now);
+            var libraryCardEntities = await _libraryCardService.GetAllAsync(lc => lc.TimeReturn < DateTimeOffset.Now);
             var libraryCardResponse = libraryCardEntities.Adapt<IEnumerable<LibraryCard.Response.Debetor>>(MapperConfigs.ForDebetor);
 
             return libraryCardResponse;
         }
 
         [HttpGet("[action]/{personId}")]
-        public ActionResult<IEnumerable<Person.Response.WithBooks>> GetPersonBooks(int personId)
+        public async Task<ActionResult<IEnumerable<Person.Response.WithBooks>>> GetPersonBooks(int personId)
         {
-            if (!_peopleService.Contains(personId))
+            if (!await _peopleService.ContainsAsync(personId))
                 return BadRequest("The person does not exist");
 
-            var libraryCardEntities = _libraryCardService.GetAll(lc => lc.PersonId == personId);
+            var libraryCardEntities = await _libraryCardService.GetAllAsync(lc => lc.PersonId == personId);
             var personResponse = libraryCardEntities.First().Person.Adapt<Person.Response.WithBooks>();
             personResponse.Books = libraryCardEntities.Adapt<IEnumerable<LibraryCard.Response.WithOutPerson>>(MapperConfigs.ForLibraryCard);
 
@@ -48,22 +49,22 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Person.Response.WithBooks> AddLibraryCard([FromBody] LibraryCard.Request.Create libraryCardRequest)
+        public async Task<ActionResult<Person.Response.WithBooks>> AddLibraryCard([FromBody] LibraryCard.Request.Create libraryCardRequest)
         {
-            if (!_bookService.Contains(libraryCardRequest.BookId))
+            if (!await _bookService.ContainsAsync(libraryCardRequest.BookId))
                 return BadRequest("The book does not exist");
-            else if (!_peopleService.Contains(libraryCardRequest.PersonId))
+            else if (!await _peopleService.ContainsAsync(libraryCardRequest.PersonId))
                 return BadRequest("The person does not exist");
-            else if (_libraryCardService.Contains(libraryCardRequest.BookId, libraryCardRequest.PersonId))
+            else if (await _libraryCardService.ContainsAsync(libraryCardRequest.BookId, libraryCardRequest.PersonId))
                 return BadRequest("The person has already taken this book.");
-            else if (_libraryCardService.GetAll(lc => lc.PersonId == libraryCardRequest.PersonId).Any(lc => lc.TimeReturn < DateTimeOffset.Now))
+            else if ((await _libraryCardService.GetAllAsync(lc => lc.PersonId == libraryCardRequest.PersonId)).Any(lc => lc.TimeReturn < DateTimeOffset.Now))
                 return BadRequest("You can't get a new book until you return the old one!");
 
             var libraryCardEntity = libraryCardRequest.Adapt<LibraryCardEntity>();
-            _libraryCardService.Insert(libraryCardEntity);
-            _libraryCardService.Save();
+            await _libraryCardService.InsertAsync(libraryCardEntity);
+            await _libraryCardService.SaveAsync();
 
-            var libraryCardEntities = _libraryCardService.GetAll(lc => lc.PersonId == libraryCardRequest.PersonId);
+            var libraryCardEntities = await _libraryCardService.GetAllAsync(lc => lc.PersonId == libraryCardRequest.PersonId);
             var personResponse = libraryCardEntities.First().Person.Adapt<Person.Response.WithBooks>();
             personResponse.Books = libraryCardEntities.Adapt<IEnumerable<LibraryCard.Response.WithOutPerson>>(MapperConfigs.ForLibraryCard);
 
@@ -71,21 +72,21 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpPut]
-        public ActionResult<Person.Response.WithBooks> UpdateLibraryCard([FromBody] LibraryCard.Request.Update libraryCardRequest)
+        public async Task<ActionResult<Person.Response.WithBooks>> UpdateLibraryCard([FromBody] LibraryCard.Request.Update libraryCardRequest)
         {
-            if (!_bookService.Contains(libraryCardRequest.BookId))
+            if (!await _bookService.ContainsAsync(libraryCardRequest.BookId))
                 return BadRequest("The book does not exist");
-            else if (!_peopleService.Contains(libraryCardRequest.PersonId))
+            else if (!await _peopleService.ContainsAsync(libraryCardRequest.PersonId))
                 return BadRequest("The person does not exist");
-            else if (!_libraryCardService.Contains(libraryCardRequest.BookId, libraryCardRequest.PersonId))
+            else if (!await _libraryCardService.ContainsAsync(libraryCardRequest.BookId, libraryCardRequest.PersonId))
                 return NotFound();
 
             var libraryCardEntity = libraryCardRequest.Adapt<LibraryCardEntity>();
             libraryCardEntity.TimeReturn = libraryCardEntity.TimeReturn.AddDays(libraryCardRequest.AddedDays);
-            _libraryCardService.Update(libraryCardEntity);
-            _libraryCardService.Save();
+            await _libraryCardService.UpdateAsync(libraryCardEntity);
+            await _libraryCardService.SaveAsync();
 
-            _libraryCardService.Get(libraryCardRequest.BookId, libraryCardRequest.PersonId);
+            libraryCardEntity = await _libraryCardService.GetAsync(libraryCardRequest.BookId, libraryCardRequest.PersonId);
             var personResponse = libraryCardEntity.Person.Adapt<Person.Response.WithBook>();
             personResponse.Book = libraryCardEntity.Adapt<LibraryCard.Response.WithOutPerson>(MapperConfigs.ForLibraryCard);
 
@@ -93,17 +94,17 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpDelete("{bookId}&{personId}")]
-        public ActionResult DeleteLibraryCard(int bookId, int personId)
+        public async Task<ActionResult> DeleteLibraryCard(int bookId, int personId)
         {
-            if (!_bookService.Contains(bookId))
+            if (!await _bookService.ContainsAsync(bookId))
                 return BadRequest("The book does not exist");
-            else if (!_peopleService.Contains(personId))
+            else if (!await _peopleService.ContainsAsync(personId))
                 return BadRequest("The person does not exist");
-            else if (!_libraryCardService.Contains(bookId, personId))
+            else if (!await _libraryCardService.ContainsAsync(bookId, personId))
                 return NotFound();
 
-            _libraryCardService.Delete(bookId, personId);
-            _libraryCardService.Save();
+            await _libraryCardService.DeleteAsync(bookId, personId);
+            await _libraryCardService.SaveAsync();
 
             return Ok();
         }

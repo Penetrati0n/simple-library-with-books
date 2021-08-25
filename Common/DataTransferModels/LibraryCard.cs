@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace SimpleLibraryWithBooks.Models
+namespace Common.DataTransferModels
 {
     public class LibraryCard
     {

@@ -1,9 +1,10 @@
 ﻿using Database.Models;
+using Database.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Database
 {
-    public class DatabaseContext : DbContext
+    public class DatabaseContext : DbContext, IDatabaseContext
     {
         public DbSet<AuthorEntity> Authors { get; set; }
         public DbSet<BookEntity> Books { get; set; }
@@ -16,7 +17,7 @@ namespace Database
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options)
         {
-            Database.Migrate();
+            Database.MigrateAsync().Wait();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
