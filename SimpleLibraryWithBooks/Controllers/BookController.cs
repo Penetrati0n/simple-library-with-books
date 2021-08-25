@@ -1,6 +1,7 @@
 ﻿using Mapster;
 using System.Linq;
 using Database.Models;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Common.DataTransferModels;
 using System.Collections.Generic;
@@ -24,9 +25,9 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Book.Response.Without.People> GetBooksByAuthor([FromQuery] Author.Request.FilterForBooks authorRequest)
+        public async Task<IEnumerable<Book.Response.Without.People>> GetBooksByAuthor([FromQuery] Author.Request.FilterForBooks authorRequest)
         {
-            var bookEntities = _bookService.GetAll();
+            var bookEntities = await _bookService.GetAllAsync();
             if (!string.IsNullOrEmpty(authorRequest.FirstName))
                 bookEntities = bookEntities.Where(b => b.Author.FirstName.ToLower().Contains(authorRequest.FirstName.ToLower()));
             if (!string.IsNullOrEmpty(authorRequest.MiddleName))
@@ -37,7 +38,7 @@ namespace SimpleLibraryWithBooks.Controllers
             foreach (var bookEntity in bookEntities)
             {
                 var bookResponse = bookEntity.Adapt<Book.Response.Without.People>();
-                bookResponse.Author = _authorService.Get(bookEntity.AuthorId).Adapt<Author.Response>();
+                bookResponse.Author = (await _authorService.GetAsync(bookEntity.AuthorId)).Adapt<Author.Response>();
                 bookResponse.Genres = bookEntity.Genres.Adapt<IEnumerable<Genre.Response.WithoutBooks>>();
                 booksResponse.Add(bookResponse);
             }
@@ -46,17 +47,17 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpGet("{genreId}")]
-        public ActionResult<IEnumerable<Book.Response.Without.People>> GetBooksByGenre(int genreId)
+        public async Task<ActionResult<IEnumerable<Book.Response.Without.People>>> GetBooksByGenre(int genreId)
         {
-            if (!_genreService.Contains(genreId))
+            if (!await _genreService.ContainsAsync(genreId))
                 return BadRequest("The genre does not exist");
 
-            var bookEntities = _bookService.GetAll(b => b.Genres.Any(g => g.Id == genreId));
+            var bookEntities = await _bookService.GetAllAsync(b => b.Genres.Any(g => g.Id == genreId));
             var booksResponse = new List<Book.Response.Without.People>();
             foreach (var bookEntity in bookEntities)
             {
                 var bookResponse = bookEntity.Adapt<Book.Response.Without.People>();
-                bookResponse.Author = _authorService.Get(bookEntity.AuthorId).Adapt<Author.Response>();
+                bookResponse.Author = (await _authorService.GetAsync(bookEntity.AuthorId)).Adapt<Author.Response>();
                 bookResponse.Genres = bookEntity.Genres.Adapt<IEnumerable<Genre.Response.WithoutBooks>>();
                 booksResponse.Add(bookResponse);
             }
@@ -65,38 +66,38 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Book.Response.Without.People> AddBook([FromBody] Book.Request.Create bookRequest)
+        public async Task<ActionResult<Book.Response.Without.People>> AddBook([FromBody] Book.Request.Create bookRequest)
         {
-            if (!_authorService.Contains(bookRequest.AuthorId))
+            if (!await _authorService.ContainsAsync(bookRequest.AuthorId))
                 return BadRequest("The author does not exist.");
-            else if (_bookService.Contains(bookRequest.Name, bookRequest.AuthorId))
+            else if (await _bookService.ContainsAsync(bookRequest.Name, bookRequest.AuthorId))
                 return BadRequest("The book already exists.");
             else if (bookRequest.Genres.Any(g => !_genreService.Contains(g.Id)))
                 return BadRequest("There are no such genres.");
 
             var bookEntity = bookRequest.Adapt<BookEntity>();
             bookEntity.Genres = bookRequest.Genres.Select(g => new GenreEntity() { Id = g.Id }).ToList();
-            _bookService.Insert(bookEntity);
-            _bookService.Save();
+            await _bookService.InsertAsync(bookEntity);
+            await _bookService.SaveAsync();
 
             var bookResponse = bookEntity.Adapt<Book.Response.Without.People>();
-            bookResponse.Author = _authorService.Get(bookEntity.AuthorId).Adapt<Author.Response>();
+            bookResponse.Author = (await _authorService.GetAsync(bookEntity.AuthorId)).Adapt<Author.Response>();
             bookResponse.Genres = bookEntity.Genres.Adapt<IEnumerable<Genre.Response.WithoutBooks>>();
 
             return Ok(bookResponse);
         }
 
         [HttpPut]
-        public ActionResult<Book.Response.Without.People> UpdateBook([FromBody] Book.Request.Update bookRequest)
+        public async Task<ActionResult<Book.Response.Without.People>> UpdateBook([FromBody] Book.Request.Update bookRequest)
         {
             if (bookRequest.AddGenres == null)
                 bookRequest.AddGenres = new List<Genre.Request.ForBook>();
             if (bookRequest.DeleteGenres == null)
                 bookRequest.DeleteGenres = new List<Genre.Request.ForBook>();
 
-            if (!_bookService.Contains(bookRequest.Id))
+            if (!await _bookService.ContainsAsync(bookRequest.Id))
                 return NotFound();
-            else if (!_authorService.Contains(bookRequest.AuthorId))
+            else if (!await _authorService.ContainsAsync(bookRequest.AuthorId))
                 return BadRequest("The author does not exist.");
             else if (bookRequest.AddGenres.Concat(bookRequest.DeleteGenres).Distinct().Any(g => !_genreService.Contains(g.Id)))
                 return BadRequest("There is no genre from this list.");
@@ -106,27 +107,27 @@ namespace SimpleLibraryWithBooks.Controllers
                 .Select(g => new GenreEntity() { Id = g.Id, Name = "A" })
                 .Concat(bookRequest.DeleteGenres.Select(g => new GenreEntity() { Id = g.Id, Name = "D" }))
                 .ToList();
-            _bookService.Update(bookEntity);
-            _bookService.Save();
+            await _bookService.UpdateAsync(bookEntity);
+            await _bookService.SaveAsync();
 
-            bookEntity = _bookService.Get(bookRequest.Id);
+            bookEntity = await _bookService.GetAsync(bookRequest.Id);
             var bookResponse = bookEntity.Adapt<Book.Response.Without.People>();
-            bookResponse.Author = _authorService.Get(bookEntity.AuthorId).Adapt<Author.Response>();
+            bookResponse.Author = (await _authorService.GetAsync(bookEntity.AuthorId)).Adapt<Author.Response>();
             bookResponse.Genres = bookEntity.Genres.Adapt<IEnumerable<Genre.Response.WithoutBooks>>();
 
             return Ok(bookResponse);
         }
 
         [HttpDelete("{bookId}")]
-        public ActionResult DeleteBook(int bookId)
+        public async Task<ActionResult> DeleteBook(int bookId)
         {
-            if (!_bookService.Contains(bookId))
+            if (!await _bookService.ContainsAsync(bookId))
                 return NotFound("The book does not exist.");
-            else if (_bookService.Get(bookId).LibraryCards.Any())
+            else if ((await _bookService.GetAsync(bookId)).LibraryCards.Any())
                 return BadRequest("Deletion is not possible. This book is in the possession of a person.");
 
-            _bookService.Delete(bookId);
-            _bookService.Save();
+            await _bookService.DeleteAsync(bookId);
+            await _bookService.SaveAsync();
 
             return Ok();
         }

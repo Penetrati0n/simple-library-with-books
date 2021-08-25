@@ -1,21 +1,25 @@
 ﻿using System;
 using Database.Models;
+using System.Threading.Tasks;
+using System.Linq.Expressions;
 using System.Collections.Generic;
 
 namespace Infrastructure.Services.Interfaces
 {
     public interface IGenreService
     {
-        IEnumerable<GenreEntity> GetAll();
-        IEnumerable<GenreEntity> GetAll(Func<GenreEntity, bool> rule);
-        GenreEntity Get(int genreId);
-        GenreEntity Get(string genreName);
-        void Insert(GenreEntity genre);
-        void Update(GenreEntity genre);
-        void Delete(int genreId);
-        void Delete(string genreName);
+        Task<IEnumerable<GenreEntity>> GetAllAsync();
+        Task<IEnumerable<GenreEntity>> GetAllAsync(Expression<Func<GenreEntity, bool>> rule);
+        Task<GenreEntity> GetAsync(int genreId);
+        Task<GenreEntity> GetAsync(string genreName);
+        Task InsertAsync(GenreEntity genre);
+        Task UpdateAsync(GenreEntity genre);
+        Task DeleteAsync(int genreId);
+        Task DeleteAsync(string genreName);
+        Task<bool> ContainsAsync(int genreId);
+        Task<bool> ContainsAsync(string genreName);
         bool Contains(int genreId);
         bool Contains(string genreName);
-        void Save();
+        Task SaveAsync();
     }
 }

@@ -1,21 +1,23 @@
 ﻿using System;
 using Database.Models;
+using System.Threading.Tasks;
+using System.Linq.Expressions;
 using System.Collections.Generic;
 
 namespace Infrastructure.Services.Interfaces
 {
     public interface IAuthorService
     {
-        IEnumerable<AuthorEntity> GetAll();
-        IEnumerable<AuthorEntity> GetAll(Func<AuthorEntity, bool> rule);
-        AuthorEntity Get(int authorId);
-        AuthorEntity Get(string firstName, string middleName, string lastName);
-        void Insert(AuthorEntity author);
-        void Update(AuthorEntity author);
-        void Delete(int authorId);
-        void Delete(string firstName, string middleName, string lastName);
-        bool Contains(int authorId);
-        bool Contains(string firstName, string middleName, string lastName);
-        void Save();
+        Task<IEnumerable<AuthorEntity>> GetAllAsync();
+        Task<IEnumerable<AuthorEntity>> GetAllAsync(Expression<Func<AuthorEntity, bool>> rule);
+        Task<AuthorEntity> GetAsync(int authorId);
+        Task<AuthorEntity> GetAsync(string firstName, string middleName, string lastName);
+        Task InsertAsync(AuthorEntity author);
+        Task UpdateAsync(AuthorEntity author);
+        Task DeleteAsync(int authorId);
+        Task DeleteAsync(string firstName, string middleName, string lastName);
+        Task<bool> ContainsAsync(int authorId);
+        Task<bool> ContainsAsync(string firstName, string middleName, string lastName);
+        Task SaveAsync();
     }
 }

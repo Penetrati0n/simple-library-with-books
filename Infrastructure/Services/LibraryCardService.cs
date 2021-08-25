@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
 using Database.Models;
+using Database.Interfaces;
+using System.Threading.Tasks;
+using System.Linq.Expressions;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Services.Interfaces;
-using Database.Interfaces;
 
 namespace Infrastructure.Services
 {
@@ -15,36 +17,31 @@ namespace Infrastructure.Services
         public LibraryCardService(IDatabaseContext context) =>
             _context = context;
 
-        public IEnumerable<LibraryCardEntity> GetAll() =>
-            _context.LibraryCards
-                .Include(lc => lc.Book)
-                    .ThenInclude(b => b.Genres)
-                .Include(lc => lc.Book)
-                    .ThenInclude(b => b.Author)
-                .Include(lc => lc.Person);
+        public async Task<IEnumerable<LibraryCardEntity>> GetAllAsync() =>
+            await GetLibraryCards().ToListAsync();
 
-        public IEnumerable<LibraryCardEntity> GetAll(Func<LibraryCardEntity, bool> rule) =>
-            GetAll().Where(rule);
+        public async Task<IEnumerable<LibraryCardEntity>> GetAllAsync(Expression<Func<LibraryCardEntity, bool>> rule) =>
+            await GetLibraryCards().Where(rule).ToListAsync();
 
-        public LibraryCardEntity Get(int bookId, int personId) =>
-            GetAll().Single(lc => lc.BookId == bookId && lc.PersonId == personId);
+        public async Task<LibraryCardEntity> GetAsync(int bookId, int personId) =>
+            await GetLibraryCards().SingleAsync(lc => lc.BookId == bookId && lc.PersonId == personId);
 
-        public void Insert(LibraryCardEntity libraryCard) =>
-            _context.LibraryCards.Add(libraryCard);
+        public async Task InsertAsync(LibraryCardEntity libraryCard) =>
+            await _context.LibraryCards.AddAsync(libraryCard);
 
-        public void Update(LibraryCardEntity libraryCard)
+        public async Task UpdateAsync(LibraryCardEntity libraryCard)
         {
-            var oldLibraryCard = Get(libraryCard.BookId, libraryCard.PersonId);
+            var oldLibraryCard = await GetAsync(libraryCard.BookId, libraryCard.PersonId);
             oldLibraryCard.TimeReturn = oldLibraryCard.TimeReturn.Add(libraryCard.TimeReturn - default(DateTimeOffset));
         }
 
-        public void Delete(int bookId, int personId) =>
-            _context.LibraryCards.Remove(Get(bookId, personId));
+        public async Task DeleteAsync(int bookId, int personId) =>
+            _context.LibraryCards.Remove(await GetAsync(bookId, personId));
 
-        public bool Contains(int bookId, int personId) =>
-            _context.LibraryCards.Any(lc => lc.BookId == bookId && lc.PersonId == personId);
+        public async Task<bool> ContainsAsync(int bookId, int personId) =>
+            await _context.LibraryCards.AnyAsync(lc => lc.BookId == bookId && lc.PersonId == personId);
 
-        public void Save()
+        public async Task SaveAsync()
         {
             var entries = _context.ChangeTracker.Entries();
             foreach (var entry in entries.Where(e => e.State == EntityState.Added))
@@ -66,7 +63,15 @@ namespace Infrastructure.Services
                 entity.TimeEdit = DateTimeOffset.Now;
                 entity.Version++;
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
+
+        private IQueryable<LibraryCardEntity> GetLibraryCards() =>
+            _context.LibraryCards
+                .Include(lc => lc.Book)
+                    .ThenInclude(b => b.Genres)
+                .Include(lc => lc.Book)
+                    .ThenInclude(b => b.Author)
+                .Include(lc => lc.Person);
     }
 }

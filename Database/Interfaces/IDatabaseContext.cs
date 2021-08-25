@@ -17,7 +17,7 @@ namespace Database.Interfaces
 
         int SaveChanges();
         int SaveChanges(bool acceptAllChangesOnSuccess);
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
-        Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken);
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+        Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default);
     }
 }

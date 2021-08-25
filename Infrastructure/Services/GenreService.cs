@@ -2,6 +2,8 @@
 using System.Linq;
 using Database.Models;
 using Database.Interfaces;
+using System.Threading.Tasks;
+using System.Linq.Expressions;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Services.Interfaces;
@@ -15,32 +17,38 @@ namespace Infrastructure.Services
         public GenreService(IDatabaseContext context) =>
             _context = context;
 
-        public IEnumerable<GenreEntity> GetAll() =>
-            _context.Genres.Include(g => g.Books);
+        public async Task<IEnumerable<GenreEntity>> GetAllAsync() =>
+            await GetGenres().ToListAsync();
 
-        public IEnumerable<GenreEntity> GetAll(Func<GenreEntity, bool> rule) =>
-            GetAll().Where(rule);
+        public async Task<IEnumerable<GenreEntity>> GetAllAsync(Expression<Func<GenreEntity, bool>> rule) =>
+            await GetGenres().Where(rule).ToListAsync();
 
-        public GenreEntity Get(int genreId) =>
-            GetAll().Single(g => g.Id == genreId);
+        public async Task<GenreEntity> GetAsync(int genreId) =>
+            await GetGenres().SingleAsync(g => g.Id == genreId);
 
-        public GenreEntity Get(string genreName) =>
-            GetAll().Single(g => g.Name == genreName);
+        public async Task<GenreEntity> GetAsync(string genreName) =>
+            await GetGenres().SingleAsync(g => g.Name == genreName);
 
-        public void Insert(GenreEntity genre) =>
-            _context.Genres.Add(genre);
+        public async Task InsertAsync(GenreEntity genre) =>
+            await _context.Genres.AddAsync(genre);
 
-        public void Update(GenreEntity genre)
+        public async Task UpdateAsync(GenreEntity genre)
         {
-            var oldGenre = Get(genre.Id);
+            var oldGenre = await GetAsync(genre.Id);
             oldGenre.Name = genre.Name;
         }
 
-        public void Delete(int genreId) =>
-            _context.Genres.Remove(Get(genreId));
+        public async Task DeleteAsync(int genreId) =>
+            _context.Genres.Remove(await GetAsync(genreId));
 
-        public void Delete(string genreName) =>
-            _context.Genres.Remove(Get(genreName));
+        public async Task DeleteAsync(string genreName) =>
+            _context.Genres.Remove(await GetAsync(genreName));
+
+        public async Task<bool> ContainsAsync(int genreId) =>
+            await _context.Genres.AnyAsync(g => g.Id == genreId);
+
+        public async Task<bool> ContainsAsync(string genreName) =>
+            await _context.Genres.AnyAsync(g => g.Name == genreName);
 
         public bool Contains(int genreId) =>
             _context.Genres.Any(g => g.Id == genreId);
@@ -48,7 +56,7 @@ namespace Infrastructure.Services
         public bool Contains(string genreName) =>
             _context.Genres.Any(g => g.Name == genreName);
 
-        public void Save()
+        public async Task SaveAsync()
         {
             var entries = _context.ChangeTracker.Entries();
             foreach (var entry in entries.Where(e => e.State == EntityState.Added))
@@ -70,7 +78,10 @@ namespace Infrastructure.Services
                 entity.TimeEdit = DateTimeOffset.Now;
                 entity.Version++;
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
+
+        private IQueryable<GenreEntity> GetGenres() =>
+            _context.Genres.Include(g => g.Books);
     }
 }

@@ -2,6 +2,8 @@
 using System.Linq;
 using Database.Models;
 using Database.Interfaces;
+using System.Threading.Tasks;
+using System.Linq.Expressions;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Services.Interfaces;
@@ -15,46 +17,46 @@ namespace Infrastructure.Services
         public AuthorService(IDatabaseContext context) =>
             _context = context;
 
-        public IEnumerable<AuthorEntity> GetAll() =>
-            _context.Authors;
+        public async Task<IEnumerable<AuthorEntity>> GetAllAsync() =>
+            await GetAuthors().ToListAsync();
 
-        public IEnumerable<AuthorEntity> GetAll(Func<AuthorEntity, bool> rule) =>
-            GetAll().Where(rule);
+        public async Task<IEnumerable<AuthorEntity>> GetAllAsync(Expression<Func<AuthorEntity, bool>> rule) =>
+            await GetAuthors().Where(rule).ToListAsync();
 
-        public AuthorEntity Get(int authorId) =>
-            GetAll().Single(a => a.Id == authorId);
+        public async Task<AuthorEntity> GetAsync(int authorId) =>
+            await GetAuthors().SingleAsync(a => a.Id == authorId);
 
-        public AuthorEntity Get(string firstName, string middleName, string lastName) =>
-            GetAll().Single(a => a.FirstName == firstName &&
-                                 a.MiddleName == middleName &&
-                                 a.LastName == lastName);
+        public async Task<AuthorEntity> GetAsync(string firstName, string middleName, string lastName) =>
+            await GetAuthors().SingleAsync(a => a.FirstName == firstName &&
+                                           a.MiddleName == middleName &&
+                                           a.LastName == lastName);
 
-        public void Insert(AuthorEntity author) =>
-            _context.Authors.Add(author);
+        public async Task InsertAsync(AuthorEntity author) =>
+            await _context.Authors.AddAsync(author);
 
-        public void Update(AuthorEntity author)
+        public async Task UpdateAsync(AuthorEntity author)
         {
-            var oldAuthor = Get(author.Id);
+            var oldAuthor = await GetAsync(author.Id);
             oldAuthor.FirstName = author.FirstName;
             oldAuthor.MiddleName = author.MiddleName;
             oldAuthor.LastName = author.LastName;
         }
 
-        public void Delete(int authorId) =>
-            _context.Authors.Remove(Get(authorId));
+        public async Task DeleteAsync(int authorId) =>
+            _context.Authors.Remove(await GetAsync(authorId));
 
-        public void Delete(string firstName, string middleName, string lastName) =>
-            _context.Authors.Remove(Get(firstName, middleName, lastName));
+        public async Task DeleteAsync(string firstName, string middleName, string lastName) =>
+            _context.Authors.Remove(await GetAsync(firstName, middleName, lastName));
 
-        public bool Contains(int authorId) =>
-            _context.Authors.Any(a => a.Id == authorId);
+        public async Task<bool> ContainsAsync(int authorId) =>
+            await _context.Authors.AnyAsync(a => a.Id == authorId);
 
-        public bool Contains(string firstName, string middleName, string lastName) =>
-            _context.Authors.Any(a => a.FirstName == firstName &&
-                                      a.MiddleName == middleName &&
-                                      a.LastName == lastName);
+        public async Task<bool> ContainsAsync(string firstName, string middleName, string lastName) =>
+            await _context.Authors.AnyAsync(a => a.FirstName == firstName &&
+                                                 a.MiddleName == middleName &&
+                                                 a.LastName == lastName);
 
-        public void Save()
+        public async Task SaveAsync()
         {
             var entries = _context.ChangeTracker.Entries();
             foreach (var entry in entries.Where(e => e.State == EntityState.Added))
@@ -76,7 +78,10 @@ namespace Infrastructure.Services
                 entity.TimeEdit = DateTimeOffset.Now;
                 entity.Version++;
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
+
+        private IQueryable<AuthorEntity> GetAuthors() =>
+            _context.Authors;
     }
 }

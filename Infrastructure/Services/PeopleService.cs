@@ -2,6 +2,8 @@
 using System.Linq;
 using Database.Models;
 using Database.Interfaces;
+using System.Threading.Tasks;
+using System.Linq.Expressions;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Services.Interfaces;
@@ -15,60 +17,59 @@ namespace Infrastructure.Services
         public PeopleService(IDatabaseContext context) =>
             _context = context;
 
-        public IEnumerable<PersonEntity> GetAll() =>
-            _context.People
-                .Include(p => p.LibraryCards);
+        public async Task<IEnumerable<PersonEntity>> GetAllAsync() =>
+            await GetPeople().ToListAsync();
 
-        public IEnumerable<PersonEntity> GetAll(string firstName, string middleName, string lastName) =>
-            GetAll().Where(p => p.FirstName == firstName &&
-                                p.MiddleName == middleName &&
-                                p.LastName == lastName);
+        public async Task<IEnumerable<PersonEntity>> GetAllAsync(string firstName, string middleName, string lastName) =>
+            await GetPeople().Where(p => p.FirstName == firstName &&
+                                    p.MiddleName == middleName &&
+                                    p.LastName == lastName).ToListAsync();
 
-        public IEnumerable<PersonEntity> GetAll(Func<PersonEntity, bool> rule) =>
-            GetAll().Where(rule);
+        public async Task<IEnumerable<PersonEntity>> GetAllAsync(Expression<Func<PersonEntity, bool>> rule) =>
+            await GetPeople().Where(rule).ToListAsync();
 
-        public PersonEntity Get(int personId) =>
-           GetAll().Single(p => p.Id == personId);
+        public async Task<PersonEntity> GetAsync(int personId) =>
+           await GetPeople().SingleAsync(p => p.Id == personId);
 
-        public PersonEntity Get(string firstName, string middleName, string lastName, DateTimeOffset birthday) =>
-            GetAll().Single(p => p.FirstName == firstName &&
-                                 p.MiddleName == middleName &&
-                                 p.LastName == lastName &&
-                                 p.Birthday == birthday);
+        public async Task<PersonEntity> GetAsync(string firstName, string middleName, string lastName, DateTimeOffset birthday) =>
+            await GetPeople().SingleAsync(p => p.FirstName == firstName &&
+                                               p.MiddleName == middleName &&
+                                               p.LastName == lastName &&
+                                               p.Birthday == birthday);
 
-        public void Delete(int personId) =>
-            _context.People.Remove(Get(personId));
+        public async Task DeleteAsync(int personId) =>
+            _context.People.Remove(await GetAsync(personId));
 
-        public void Delete(string firstName, string middleName, string lastName) =>
-            _context.People.RemoveRange(GetAll(firstName, middleName, lastName));
+        public async Task DeleteAsync(string firstName, string middleName, string lastName) =>
+            _context.People.RemoveRange(await GetAllAsync(firstName, middleName, lastName));
 
-        public void Insert(PersonEntity person) =>
-            _context.People.Add(person);
+        public async Task InsertAsync(PersonEntity person) =>
+            await _context.People.AddAsync(person);
 
-        public void Update(PersonEntity personUpdated)
+        public async Task UpdateAsync(PersonEntity personUpdated)
         {
-            var person = Get(personUpdated.Id);
+            var person = await GetAsync(personUpdated.Id);
             person.Birthday = personUpdated.Birthday;
             person.FirstName = personUpdated.FirstName;
             person.LastName = personUpdated.LastName;
             person.MiddleName = personUpdated.MiddleName;
         }
 
-        public bool Contains(int personId) =>
-            _context.People.Any(p => p.Id == personId);
+        public async Task<bool> ContainsAsync(int personId) =>
+            await _context.People.AnyAsync(p => p.Id == personId);
 
-        public bool Contains(string firstName, string middleName, string lastName) =>
-            _context.People.Any(p => p.LastName == lastName &&
-                                     p.FirstName == firstName &&
-                                     p.MiddleName == middleName);
+        public async Task<bool> ContainsAsync(string firstName, string middleName, string lastName) =>
+            await _context.People.AnyAsync(p => p.LastName == lastName &&
+                                                p.FirstName == firstName &&
+                                                p.MiddleName == middleName);
 
-        public bool Contains(string firstName, string middleName, string lastName, DateTimeOffset birthday) =>
-            _context.People.Any(p => p.LastName == lastName &&
-                                     p.FirstName == firstName &&
-                                     p.MiddleName == middleName &&
-                                     p.Birthday == birthday);
+        public async Task<bool> ContainsAsync(string firstName, string middleName, string lastName, DateTimeOffset birthday) =>
+            await _context.People.AnyAsync(p => p.LastName == lastName &&
+                                                p.FirstName == firstName &&
+                                                p.MiddleName == middleName &&
+                                                p.Birthday == birthday);
 
-        public void Save()
+        public async Task SaveAsync()
         {
             var entries = _context.ChangeTracker.Entries();
             foreach (var entry in entries.Where(e => e.State == EntityState.Added))
@@ -90,7 +91,11 @@ namespace Infrastructure.Services
                 entity.TimeEdit = DateTimeOffset.Now;
                 entity.Version++;
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
+
+        private IQueryable<PersonEntity> GetPeople() =>
+            _context.People
+                .Include(p => p.LibraryCards);
     }
 }

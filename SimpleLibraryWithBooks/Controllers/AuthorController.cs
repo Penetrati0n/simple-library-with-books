@@ -1,6 +1,7 @@
 ﻿using Mapster;
 using System.Linq;
 using Database.Models;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Common.DataTransferModels;
 using System.Collections.Generic;
@@ -24,23 +25,23 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Author.Response> GetAuthors()
+        public async Task<IEnumerable<Author.Response>> GetAuthors()
         {
-            var authorEntities = _authorService.GetAll();
+            var authorEntities = await _authorService.GetAllAsync();
             var authorsResponse = authorEntities.Adapt<IEnumerable<Author.Response>>();
 
             return authorsResponse;
         }
 
         [HttpGet("{authorId}")]
-        public ActionResult<Author.Response.WithBooks> GetAuthor(int authorId)
+        public async Task<ActionResult<Author.Response.WithBooks>> GetAuthor(int authorId)
         {
-            if (!_authorService.Contains(authorId))
+            if (!await _authorService.ContainsAsync(authorId))
                 return NotFound();
 
-            var authorEntity = _authorService.Get(authorId);
+            var authorEntity = await _authorService.GetAsync(authorId);
             var authorReponse = authorEntity.Adapt<Author.Response.WithBooks>();
-            var bookEntities = _bookService.GetAll(b => b.AuthorId == authorId).ToList();
+            var bookEntities = await _bookService.GetAllAsync(b => b.AuthorId == authorId);
             if (bookEntities.Any())
             {
                 authorReponse.Books = bookEntities.Adapt<IEnumerable<Book.Response.Without.AuthorAndPeople>>();
@@ -52,9 +53,9 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Author.Response.WithBooks> AddAuthor([FromBody] Author.Request.Create.WithBooks authorRequest)
+        public async Task<ActionResult<Author.Response.WithBooks>> AddAuthor([FromBody] Author.Request.Create.WithBooks authorRequest)
         {
-            if (_authorService.Contains(authorRequest.FirstName, authorRequest.MiddleName, authorRequest.LastName))
+            if (await _authorService.ContainsAsync(authorRequest.FirstName, authorRequest.MiddleName, authorRequest.LastName))
                 return BadRequest("The author already exists.");
             else if (authorRequest.Books != null && authorRequest.Books.Any())
                 if (authorRequest.Books.SelectMany(b => b.Genres).Any(g => !_genreService.Contains(g.Id)))
@@ -63,8 +64,8 @@ namespace SimpleLibraryWithBooks.Controllers
                     return BadRequest("You can't add identical books.");
 
             var authorEntity = authorRequest.Adapt<AuthorEntity>();
-            _authorService.Insert(authorEntity);
-            _authorService.Save();
+            await _authorService.InsertAsync(authorEntity);
+            await _authorService.SaveAsync();
 
             var authorResponse = authorEntity.Adapt<Author.Response.WithBooks.WithoutAll>();
             if (authorRequest.Books != null && authorRequest.Books.Any())
@@ -74,11 +75,11 @@ namespace SimpleLibraryWithBooks.Controllers
                 foreach (var book in bookEntities)
                 {
                     book.Genres.Clear();
-                    _bookService.Insert(book);
+                    await _bookService.InsertAsync(book);
                     foreach (var genre in authorRequest.Books.Single(b => b.Name == book.Name).Genres)
-                        book.Genres.Add(_genreService.Get(genre.Id));
+                        book.Genres.Add(await _genreService.GetAsync(genre.Id));
                     book.AuthorId = authorEntity.Id;
-                    _bookService.Save();
+                    await _bookService.SaveAsync();
                     bookEntitiesForResponse.Add(book);
                 }
                 authorResponse.Books = bookEntitiesForResponse.Adapt<IEnumerable<Book.Response.Without.All>>();
@@ -88,14 +89,14 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpPut]
-        public ActionResult<Author.Response> UpdateAuthor([FromBody] Author.Request.Update authorRequest)
+        public async Task<ActionResult<Author.Response>> UpdateAuthor([FromBody] Author.Request.Update authorRequest)
         {
-            if (!_authorService.Contains(authorRequest.Id))
+            if (!await _authorService.ContainsAsync(authorRequest.Id))
                 return NotFound();
 
             var authorEntity = authorRequest.Adapt<AuthorEntity>();
-            _authorService.Update(authorEntity);
-            _authorService.Save();
+            await _authorService.UpdateAsync(authorEntity);
+            await _authorService.SaveAsync();
 
             var authorResponse = authorEntity.Adapt<Author.Response>();
 
@@ -103,19 +104,19 @@ namespace SimpleLibraryWithBooks.Controllers
         }
 
         [HttpDelete("{authorId}")]
-        public ActionResult DeleteAuthor(int authorId)
+        public async Task<ActionResult> DeleteAuthor(int authorId)
         {
-            if (!_authorService.Contains(authorId))
+            if (!await _authorService.ContainsAsync(authorId))
                 return NotFound();
-            else if (_bookService.GetAll(b => b.AuthorId == authorId).Any(b => b.LibraryCards.Any()))
+            else if ((await _bookService.GetAllAsync(b => b.AuthorId == authorId)).Any(b => b.LibraryCards.Any()))
                 return BadRequest("You can't delete the author and his books, because the user has 1 or more.");
 
-            _authorService.Delete(authorId);
-            _authorService.Save();
-            var bookEntities = _bookService.GetAll(b => b.AuthorId == authorId);
+            await _authorService.DeleteAsync(authorId);
+            await _authorService.SaveAsync();
+            var bookEntities = await _bookService.GetAllAsync(b => b.AuthorId == authorId);
             foreach (var book in bookEntities)
-                _bookService.Delete(book.Id);
-            _bookService.Save();
+                await _bookService.DeleteAsync(book.Id);
+            await _bookService.SaveAsync();
 
             return Ok();
         }

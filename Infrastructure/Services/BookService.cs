@@ -2,6 +2,8 @@
 using System.Linq;
 using Database.Models;
 using Database.Interfaces;
+using System.Threading.Tasks;
+using System.Linq.Expressions;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Services.Interfaces;
@@ -15,62 +17,62 @@ namespace Infrastructure.Services
         public BookService(IDatabaseContext context) =>
             _context = context;
 
-        public IEnumerable<BookEntity> GetAll() =>
-            _context.Books
-                .Include(b => b.Author)
-                .Include(b => b.Genres)
-                .Include(b => b.LibraryCards);
+        public async Task<IEnumerable<BookEntity>> GetAllAsync() =>
+            await GetBooks().ToListAsync();
 
-        public IEnumerable<BookEntity> GetAll(Func<BookEntity, bool> rule) =>
-            GetAll().Where(rule);
+        public async Task<IEnumerable<BookEntity>> GetAllAsync(Expression<Func<BookEntity, bool>> rule) =>
+            await GetBooks().Where(rule).ToListAsync();
 
-        public BookEntity Get(int bookId) =>
-            GetAll().Single(b => b.Id == bookId);
+        public async Task<BookEntity> GetAsync(int bookId) =>
+            await GetBooks().SingleAsync(b => b.Id == bookId);
 
-        public BookEntity Get(string bookName, int authorId) =>
-            GetAll().Single(b => b.Name == bookName && b.AuthorId == authorId);
+        public async Task<BookEntity> GetAsync(string bookName, int authorId) =>
+            await GetBooks().SingleAsync(b => b.Name == bookName && b.AuthorId == authorId);
 
-        public void Insert(BookEntity book)
+        public async Task InsertAsync(BookEntity book)
         {
             var genres = book.Genres.ToList();
             book.Genres.Clear();
-            _context.Books.Add(book);
+            await _context.Books.AddAsync(book);
             foreach (var genre in genres)
-                _context.Genres.Single(g => g.Id == genre.Id).Books.Add(book);
+            {
+                var genreEntity = await _context.Genres.SingleAsync(g => g.Id == genre.Id);
+                genreEntity.Books.Add(book); 
+            }
         }
 
-        public void Update(BookEntity book)
+        public async Task UpdateAsync(BookEntity book)
         {
-            var oldBook = Get(book.Id);
+            var oldBook = await GetAsync(book.Id);
             oldBook.AuthorId = book.AuthorId;
             oldBook.Name = book.Name;
             foreach (var genre in book.Genres.Where(g => g.Name == "D"))
             {
-                var genreEntity = _context.Genres.Single(g => g.Id == genre.Id);
+                var genreEntity = await _context.Genres.SingleAsync(g => g.Id == genre.Id);
                 if (oldBook.Genres.Contains(genreEntity))
                     oldBook.Genres.Remove(genreEntity);
             }
             foreach (var genre in book.Genres.Where(g => g.Name == "A"))
             {
-                var genreEntity = _context.Genres.Single(g => g.Id == genre.Id);
+                var genreEntity = await _context.Genres.SingleAsync(g => g.Id == genre.Id);
                 if (!oldBook.Genres.Contains(genreEntity))
                     oldBook.Genres.Add(genreEntity);
             }
         }
 
-        public void Delete(int bookId) =>
-            _context.Books.Remove(Get(bookId));
+        public async Task DeleteAsync(int bookId) =>
+            _context.Books.Remove(await GetAsync(bookId));
 
-        public void Delete(string bookName, int authorId) =>
-            _context.Books.Remove(Get(bookName, authorId));
+        public async Task DeleteAsync(string bookName, int authorId) =>
+            _context.Books.Remove(await GetAsync(bookName, authorId));
 
-        public bool Contains(int bookId) =>
-            _context.Books.Any(b => b.Id == bookId);
+        public async Task<bool> ContainsAsync(int bookId) =>
+            await _context.Books.AnyAsync(b => b.Id == bookId);
 
-        public bool Contains(string bookName, int authorId) =>
-            _context.Books.Any(b => b.Name == bookName && b.AuthorId == authorId);
+        public async Task<bool> ContainsAsync(string bookName, int authorId) =>
+            await _context.Books.AnyAsync(b => b.Name == bookName && b.AuthorId == authorId);
 
-        public void Save()
+        public async Task SaveAsync()
         {
             var entries = _context.ChangeTracker.Entries();
             foreach (var entry in entries.Where(e => e.State == EntityState.Added))
@@ -92,7 +94,13 @@ namespace Infrastructure.Services
                 entity.TimeEdit = DateTimeOffset.Now;
                 entity.Version++;
             }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
+
+        private IQueryable<BookEntity> GetBooks() =>
+            _context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Genres)
+                .Include(b => b.LibraryCards);
     }
 }
