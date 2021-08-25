@@ -1,7 +1,7 @@
 ﻿using System;
-using Database;
 using System.Linq;
 using Database.Models;
+using Database.Interfaces;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Services.Interfaces;
@@ -10,10 +10,10 @@ namespace Infrastructure.Services
 {
     public class GenreService : IGenreService
     {
-        private readonly DatabaseContext _context;
+        private readonly IDatabaseContext _context;
 
-        public GenreService(DbContextOptions<DatabaseContext> options) =>
-            _context = new DatabaseContext(options);
+        public GenreService(IDatabaseContext context) =>
+            _context = context;
 
         public IEnumerable<GenreEntity> GetAll() =>
             _context.Genres.Include(g => g.Books);
@@ -33,7 +33,6 @@ namespace Infrastructure.Services
         public void Update(GenreEntity genre)
         {
             var oldGenre = Get(genre.Id);
-            _context.Entry(oldGenre).State = EntityState.Modified;
             oldGenre.Name = genre.Name;
         }
 

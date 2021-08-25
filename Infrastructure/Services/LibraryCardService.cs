@@ -1,19 +1,19 @@
 ﻿using System;
-using Database;
 using System.Linq;
 using Database.Models;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Services.Interfaces;
+using Database.Interfaces;
 
 namespace Infrastructure.Services
 {
     public class LibraryCardService : ILibraryCardService
     {
-        private readonly DatabaseContext _context;
+        private readonly IDatabaseContext _context;
 
-        public LibraryCardService(DbContextOptions<DatabaseContext> options) =>
-            _context = new DatabaseContext(options);
+        public LibraryCardService(IDatabaseContext context) =>
+            _context = context;
 
         public IEnumerable<LibraryCardEntity> GetAll() =>
             _context.LibraryCards
@@ -35,7 +35,6 @@ namespace Infrastructure.Services
         public void Update(LibraryCardEntity libraryCard)
         {
             var oldLibraryCard = Get(libraryCard.BookId, libraryCard.PersonId);
-            _context.Entry(oldLibraryCard).State = EntityState.Modified;
             oldLibraryCard.TimeReturn = oldLibraryCard.TimeReturn.Add(libraryCard.TimeReturn - default(DateTimeOffset));
         }
 

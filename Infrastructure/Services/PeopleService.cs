@@ -1,7 +1,7 @@
 ﻿using System;
-using Database;
 using System.Linq;
 using Database.Models;
+using Database.Interfaces;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Services.Interfaces;
@@ -10,10 +10,10 @@ namespace Infrastructure.Services
 {
     public class PeopleService : IPeopleService
     {
-        private readonly DatabaseContext _context;
+        private readonly IDatabaseContext _context;
 
-        public PeopleService(DbContextOptions<DatabaseContext> options) =>
-            _context = new DatabaseContext(options);
+        public PeopleService(IDatabaseContext context) =>
+            _context = context;
 
         public IEnumerable<PersonEntity> GetAll() =>
             _context.People
@@ -48,7 +48,6 @@ namespace Infrastructure.Services
         public void Update(PersonEntity personUpdated)
         {
             var person = Get(personUpdated.Id);
-            _context.Entry(person).State = EntityState.Modified;
             person.Birthday = personUpdated.Birthday;
             person.FirstName = personUpdated.FirstName;
             person.LastName = personUpdated.LastName;

@@ -1,7 +1,7 @@
 ﻿using System;
-using Database;
 using System.Linq;
 using Database.Models;
+using Database.Interfaces;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Services.Interfaces;
@@ -10,10 +10,10 @@ namespace Infrastructure.Services
 {
     public class AuthorService : IAuthorService
     {
-        private readonly DatabaseContext _context;
+        private readonly IDatabaseContext _context;
 
-        public AuthorService(DbContextOptions<DatabaseContext> options) =>
-            _context = new DatabaseContext(options);
+        public AuthorService(IDatabaseContext context) =>
+            _context = context;
 
         public IEnumerable<AuthorEntity> GetAll() =>
             _context.Authors;
@@ -35,17 +35,16 @@ namespace Infrastructure.Services
         public void Update(AuthorEntity author)
         {
             var oldAuthor = Get(author.Id);
-            _context.Entry(oldAuthor).State = EntityState.Modified;
             oldAuthor.FirstName = author.FirstName;
             oldAuthor.MiddleName = author.MiddleName;
             oldAuthor.LastName = author.LastName;
         }
 
         public void Delete(int authorId) =>
-            _context.Remove(Get(authorId));
+            _context.Authors.Remove(Get(authorId));
 
         public void Delete(string firstName, string middleName, string lastName) =>
-            _context.Remove(Get(firstName, middleName, lastName));
+            _context.Authors.Remove(Get(firstName, middleName, lastName));
 
         public bool Contains(int authorId) =>
             _context.Authors.Any(a => a.Id == authorId);

@@ -1,7 +1,7 @@
 ﻿using System;
-using Database;
 using System.Linq;
 using Database.Models;
+using Database.Interfaces;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Services.Interfaces;
@@ -10,10 +10,10 @@ namespace Infrastructure.Services
 {
     public class BookService : IBookService
     {
-        private readonly DatabaseContext _context;
+        private readonly IDatabaseContext _context;
 
-        public BookService(DbContextOptions<DatabaseContext> options) =>
-            _context = new DatabaseContext(options);
+        public BookService(IDatabaseContext context) =>
+            _context = context;
 
         public IEnumerable<BookEntity> GetAll() =>
             _context.Books
@@ -42,7 +42,6 @@ namespace Infrastructure.Services
         public void Update(BookEntity book)
         {
             var oldBook = Get(book.Id);
-            _context.Entry(oldBook).State = EntityState.Modified;
             oldBook.AuthorId = book.AuthorId;
             oldBook.Name = book.Name;
             foreach (var genre in book.Genres.Where(g => g.Name == "D"))

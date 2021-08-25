@@ -1,9 +1,10 @@
 using System;
 using Database;
 using System.Linq;
+using Database.Interfaces;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Infrastructure.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using System.Collections.Generic;
 using Microsoft.Extensions.Hosting;
@@ -34,6 +35,7 @@ namespace SimpleLibraryWithBooks
 
             string connectionString = _configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<DatabaseContext>(option => option.UseNpgsql(connectionString));
+            services.AddScoped<IDatabaseContext, DatabaseContext>();
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<IPeopleService, PeopleService>();
             services.AddScoped<IGenreService, GenreService>();
