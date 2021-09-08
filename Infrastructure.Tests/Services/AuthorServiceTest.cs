@@ -102,7 +102,7 @@ namespace Infrastructure.Tests.Services
         }
 
         [Theory]
-        [InlineData("Эрих", "Ремарк", "Мария")]
+        [InlineData("Р­СЂРёС…", "Р РµРјР°СЂРє", "РњР°СЂРёСЏ")]
         public async void GetAsync_ByNames_IsAuthorEntity(string firstName, string middleName, string lastName)
         {
             using (var context = new DatabaseContext(ContextOptions))
@@ -229,7 +229,7 @@ namespace Infrastructure.Tests.Services
         }
 
         [Theory]
-        [InlineData("Эрих", "Ремарк", "Мария")]
+        [InlineData("Р­СЂРёС…", "Р РµРјР°СЂРє", "РњР°СЂРёСЏ")]
         public async void DeleteAsync_ByNames_IsDecreased(string firstName, string middleName, string lastName)
         {
             using (var context = new DatabaseContext(ContextOptions))
@@ -277,7 +277,7 @@ namespace Infrastructure.Tests.Services
         }
 
         [Theory]
-        [InlineData("Эрих", "Ремарк", "Мария", true)]
+        [InlineData("Р­СЂРёС…", "Р РµРјР°СЂРє", "РњР°СЂРёСЏ", true)]
         [InlineData("qwerty", "qwerty", "qwerty", false)]
         public async void ContainsAsync_ByNames_IsContains(string firstName, string middleName, string lastName, bool expected)
         {
