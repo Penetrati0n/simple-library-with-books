@@ -17,7 +17,10 @@ namespace Database
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options)
         {
-            Database.MigrateAsync().Wait();
+            if (Database.ProviderName != "Microsoft.EntityFrameworkCore.InMemory")
+            {
+                Database.MigrateAsync().Wait();
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
